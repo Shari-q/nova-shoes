@@ -1,0 +1,98 @@
+[
+  {
+    "id": "nova-101",
+    "name": "Nova High 01",
+    "slug": "nova-high-01",
+    "cat": "Men",
+    "price": 15990,
+    "old": 19990,
+    "img": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=1200&q=84",
+    "tag": "-20%",
+    "rating": "4.9",
+    "desc": "A sculpted high-top with premium leather panels and an editorial street silhouette."
+  },
+  {
+    "id": "nova-102",
+    "name": "Nova 550",
+    "slug": "nova-550",
+    "cat": "Women",
+    "price": 13990,
+    "old": 17990,
+    "img": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=1200&q=84",
+    "tag": "NEW",
+    "rating": "4.8",
+    "desc": "Soft neutral tones, refined proportions and a comfortable everyday profile."
+  },
+  {
+    "id": "nova-103",
+    "name": "Aero 350",
+    "slug": "aero-350",
+    "cat": "Running",
+    "price": 18990,
+    "old": 23990,
+    "img": "https://images.unsplash.com/photo-1534653299134-96a171b61581?auto=format&fit=crop&w=1200&q=84",
+    "tag": "-15%",
+    "rating": "4.9",
+    "desc": "A lightweight runner made for responsive movement and all-day comfort."
+  },
+  {
+    "id": "nova-104",
+    "name": "Court 04",
+    "slug": "court-04",
+    "cat": "Basketball",
+    "price": 17990,
+    "old": 21990,
+    "img": "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&w=1200&q=84",
+    "tag": "HOT",
+    "rating": "4.8",
+    "desc": "High-collar court energy with supportive construction and strong lines."
+  },
+  {
+    "id": "nova-105",
+    "name": "Street Mono",
+    "slug": "street-mono",
+    "cat": "Men",
+    "price": 12990,
+    "old": 15990,
+    "img": "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=1200&q=84",
+    "tag": "BEST",
+    "rating": "4.6",
+    "desc": "Minimal monochrome styling designed to work from morning to night."
+  },
+  {
+    "id": "nova-106",
+    "name": "Aura Low",
+    "slug": "aura-low",
+    "cat": "Women",
+    "price": 15490,
+    "old": 18990,
+    "img": "https://images.unsplash.com/photo-1687511597667-dcf4b483be5f?auto=format&fit=crop&w=1200&q=84",
+    "tag": "NEW",
+    "rating": "4.8",
+    "desc": "A softly sculpted low-top with a refined feminine colour palette."
+  },
+  {
+    "id": "nova-107",
+    "name": "Nova Blackout",
+    "slug": "nova-blackout",
+    "cat": "Limited",
+    "price": 22990,
+    "old": 27990,
+    "img": "https://images.unsplash.com/photo-1495555961986-6d4c1ecb7be3?auto=format&fit=crop&w=1200&q=84",
+    "tag": "LIMITED",
+    "rating": "5.0",
+    "desc": "A dark limited-edition statement pair for the NOVA private edit."
+  },
+  {
+    "id": "nova-108",
+    "name": "Nova Apex 02",
+    "slug": "nova-apex-02",
+    "cat": "Men",
+    "price": 16990,
+    "old": 20990,
+    "img": "https://images.unsplash.com/photo-1722988739840-741f160d7a08?auto=format&fit=crop&w=1200&q=84",
+    "tag": "NEW",
+    "rating": "4.8",
+    "desc": "A sharp everyday runner with layered panels and a confident street profile."
+  }
+]

@@ -376,6 +376,34 @@ function productUrl(product, index) {
   return `product.html?slug=${encodeURIComponent(slug)}`;
 }
 
+async function loadBackendProducts() {
+  try {
+    const response = await fetch('/api/products');
+    if (!response.ok) throw new Error(`Backend returned ${response.status}`);
+    const remoteProducts = await response.json();
+    if (!Array.isArray(remoteProducts) || !remoteProducts.length) return false;
+
+    products = remoteProducts.map((product, index) => ({
+      ...product,
+      name: String(product.name || `Product ${index + 1}`),
+      slug: String(product.slug || product.name || `backend-${index + 1}`),
+      cat: String(product.cat || 'Lifestyle'),
+      price: Number(product.price || 0),
+      old: Number(product.old || product.price || 0),
+      img: safeProductImage(product.img),
+      tag: String(product.tag || 'NEW'),
+      rating: String(product.rating || '4.8'),
+      desc: String(product.desc || ''),
+    }));
+
+    refreshProductSurfaces();
+    return true;
+  } catch (error) {
+    console.warn('Backend catalog unavailable; trying Sanity next.', error);
+    return false;
+  }
+}
+
 async function loadSanityProducts() {
   const { projectId, dataset, apiVersion } = NOVA_SANITY;
   if (!projectId || projectId === "YOUR_SANITY_PROJECT_ID") return;
@@ -1438,7 +1466,9 @@ function init() {
     initAuthPage();
   if (document.body.classList.contains("product-body")) initProductPage();
   if (document.body.classList.contains("checkout-body")) initCheckout();
-  loadSanityProducts();
+  loadBackendProducts().then((loaded) => {
+    if (!loaded) loadSanityProducts();
+  });
   document.querySelectorAll(".tilt").forEach((el) => {
     el.addEventListener("mousemove", (e) => {
       const r = el.getBoundingClientRect(),

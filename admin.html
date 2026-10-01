@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NOVA Admin Dashboard</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --surface: #ffffff;
+        --surface-soft: #f7f9fc;
+        --line: #e7edf5;
+        --text: #18212f;
+        --muted: #6d7a8b;
+        --primary: #0b4d9a;
+        --primary-dark: #0a3d7a;
+        --primary-soft: rgba(11, 77, 154, 0.12);
+        --blue: #1a8cff;
+        --green: #3ccf91;
+        --orange: #ffad42;
+        --red: #ff6b6b;
+        --shadow: 0 16px 35px rgba(15, 33, 54, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      a, button, input, select, textarea { font: inherit; }
+      button { cursor: pointer; }
+      img { max-width: 100%; }
+
+      .page-shell {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #0f3d7a 0%, #0b2f63 100%);
+        color: #e9f1ff;
+        padding: 20px 18px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .brand-block {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 6px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: rgba(255,255,255,0.2);
+        font-weight: 800;
+        color: #fff;
+      }
+
+      .brand-name {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      .side-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(255,255,255,0.7);
+        margin: 10px 8px 8px;
+      }
+
+      .nav-group {
+        display: grid;
+        gap: 6px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: rgba(255,255,255,0.9);
+        padding: 10px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        background: transparent;
+        border: none;
+        width: 100%;
+        text-align: left;
+      }
+
+      .nav-item.active {
+        background: rgba(255,255,255,0.08);
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+      }
+
+      .nav-item .icon {
+        width: 16px;
+        text-align: center;
+        opacity: 0.9;
+      }
+
+      .nav-sub {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .main-panel {
+        flex: 1;
+        padding: 22px 24px 30px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .search-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 11px 14px;
+        width: min(390px, 100%);
+        box-shadow: var(--shadow);
+      }
+
+      .search-box input {
+        border: none;
+        background: transparent;
+        outline: none;
+        width: 100%;
+        color: var(--text);
+      }
+
+      .user-panel {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .lang-chip {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        padding: 8px 10px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+      }
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffc371, #ff8c4d);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .hero-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .welcome h1 {
+        margin: 0 0 6px;
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+      }
+
+      .welcome p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .warning-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff9e9;
+        color: #866300;
+        border: 1px solid #f4d98e;
+        border-radius: 12px;
+        padding: 10px 14px;
+        max-width: 330px;
+      }
+
+      .warning-box strong {
+        font-size: 1.1rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--muted);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .mini-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-size: 0.9rem;
+      }
+
+      .stat-value {
+        margin-top: 18px;
+        font-weight: 700;
+        font-size: clamp(1.7rem, 2vw, 2.2rem);
+      }
+
+      .status-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .status-box {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: var(--shadow);
+      }
+
+      .status-box .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+
+      .status-box .meta {
+        flex: 1;
+      }
+
+      .status-box .meta strong {
+        display: block;
+        font-size: 1.1rem;
+      }
+
+      .status-box small {
+        color: var(--muted);
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 0.9fr;
+        gap: 18px;
+        margin-bottom: 20px;
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 18px 16px;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      .panel-header h3 {
+        margin: 0;
+        font-size: 1.15rem;
+      }
+
+      .chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        background: var(--surface-soft);
+        padding: 6px 9px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .chip.active {
+        background: var(--primary-soft);
+        color: var(--primary);
+        border-color: rgba(11,77,154,0.15);
+      }
+
+      .chart-area {
+        height: 210px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(26,140,255,0.03), rgba(26,140,255,0.0));
+        border: 1px solid var(--line);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .chart-area::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(rgba(162,177,198,0.16) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(162,177,198,0.16) 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+
+      .line-graph {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .donut-wrap {
+        display: grid;
+        place-items: center;
+        min-height: 216px;
+      }
+
+      .donut {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: conic-gradient(var(--blue) 0 70%, #dfeaf8 70% 100%);
+        position: relative;
+      }
+
+      .donut::after {
+        content: "";
+        position: absolute;
+        inset: 22px;
+        background: #fff;
+        border-radius: 50%;
+      }
+
+      .donut-center {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        z-index: 1;
+      }
+
+      .legend {
+        display: grid;
+        gap: 8px;
+        margin-top: 18px;
+        color: var(--muted);
+       font-size: 0.85rem;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .swatch {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 18px;
+      }
+
+      .catalog-layout {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        gap: 18px;
+        padding: 0 18px 18px;
+      }
+
+      .mini-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .product-form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .product-form .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .product-form input,
+      .product-form select,
+      .product-form textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: var(--surface-soft);
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: var(--text);
+      }
+
+      .product-form textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+
+      .catalog-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 14px;
+      }
+
+      .catalog-item {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .catalog-item img {
+        width: 100%;
+        height: 170px;
+        object-fit: cover;
+      }
+
+      .catalog-item-body {
+        padding: 12px;
+      }
+
+      .catalog-item-body h4 {
+        margin: 0 0 6px;
+        font-size: 1rem;
+      }
+
+      .catalog-item-meta {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .catalog-item-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      .catalog-item-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .mini-title {
+        margin: 0 0 14px;
+        font-size: 1.02rem;
+      }
+
+      .product-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .product-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .product-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .product-item img {
+        width: 42px;
+        height: 42px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+      }
+
+      .tag {
+        font-size: 0.72rem;
+        border-radius: 999px;
+        padding: 5px 8px;
+        background: var(--primary-soft);
+        color: var(--primary);
+      }
+
+      .tag.orange { background: rgba(255,173,66,0.12); color: #bf7b00; }
+      .tag.red { background: rgba(255,107,107,0.12); color: #c63d3d; }
+
+      .table-panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        margin-top: 20px;
+        overflow: hidden;
+      }
+
+      .table-panel .panel-header {
+        padding: 18px 18px 10px;
+        margin-bottom: 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        padding: 12px 18px;
+        text-align: left;
+        border-top: 1px solid var(--line);
+        vertical-align: middle;
+      }
+
+      th {
+        background: var(--surface-soft);
+        color: var(--muted);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .status-pill {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        background: rgba(60,207,145,0.12);
+        color: #1f9e68;
+      }
+
+      .status-pill.pending { background: rgba(255,173,66,0.12); color: #b67300; }
+      .status-pill.cancelled { background: rgba(255,107,107,0.12); color: #b03232; }
+
+      .action-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .mini-btn,
+      .primary-btn,
+      .ghost-btn {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 12px;
+        background: var(--surface-soft);
+        color: var(--text);
+      }
+
+      .primary-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+      }
+
+      .ghost-btn {
+        background: transparent;
+      }
+
+      .danger-btn {
+        background: rgba(255,107,107,0.08);
+        color: #bb3d3d;
+        border: 1px solid rgba(255,107,107,0.18);
+        border-radius: 10px;
+        padding: 8px 12px;
+      }
+
+      .login-shell {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 22px;
+        background: linear-gradient(135deg, #edf3fe, #eef5ff 35%, #f3f7fb);
+      }
+
+      .login-card {
+        width: min(440px, 100%);
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 28px 26px;
+        box-shadow: var(--shadow);
+      }
+
+      .eyebrow {
+        color: var(--primary);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 700;
+      }
+
+      .login-card h1 {
+        margin: 12px 0 8px;
+        font-size: clamp(2rem, 4vw, 2.6rem);
+      }
+
+      .login-card p {
+        color: var(--muted);
+        margin: 0 0 22px;
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .field label {
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .field input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        background: var(--surface-soft);
+        border-radius: 12px;
+        color: var(--text);
+        outline: none;
+      }
+
+      .alert {
+        display: none;
+        margin: 0 0 16px;
+        border-radius: 10px;
+        padding: 11px 12px;
+        font-size: 0.9rem;
+      }
+      .alert.error { display: block; background: rgba(255,107,107,0.1); color: #b23d3d; border: 1px solid rgba(255,107,107,0.18); }
+      .alert.success { display: block; background: rgba(60,207,145,0.1); color: #167d4d; border: 1px solid rgba(60,207,145,0.18); }
+
+      .hidden { display: none !important; }
+
+      @media (max-width: 1100px) {
+        .stats-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+        .status-row { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+        .bottom-grid { grid-template-columns: 1fr; }
+        .content-grid { grid-template-columns: 1fr; }
+        .catalog-layout { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 860px) {
+        .page-shell { display: block; }
+        .sidebar { width: 100%; }
+        .main-panel { padding-top: 12px; }
+        .topbar, .hero-row { display: grid; }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="login-shell" id="loginShell">
+      <div class="login-card">
+        <div class="eyebrow">NOVA Admin</div>
+        <h1>Sign in</h1>
+        <p>Manage products, orders, customers and sales performance.</p>
+        <div id="loginAlert" class="alert error"></div>
+        <form id="loginForm">
+          <div class="field">
+            <label for="email">Admin email</label>
+            <input id="email" name="email" type="email" value="admin@nova.com" required />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" value="nova123" required />
+          </div>
+          <button class="primary-btn" type="submit" style="width: 100%;">Login to dashboard</button>
+        </form>
+      </div>
+    </section>
+
+    <div class="page-shell hidden" id="dashboardShell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">N</div>
+          <div class="brand-name">NOVA</div>
+        </div>
+
+        <div class="nav-group">
+          <button class="nav-item active"><span class="icon">◉</span> Dashboard</button>
+          <button class="nav-item"><span class="icon">◫</span> POS</button>
+          <button class="nav-item"><span class="icon">☰</span> Orders</button>
+          <button class="nav-item"><span class="icon">◍</span> Customers</button>
+        </div>
+
+        <div class="side-label">Product management</div>
+        <div class="nav-group">
+          <button class="nav-item"><span class="icon">◌</span> Category Setup</button>
+          <button class="nav-item"><span class="icon">◐</span> Brands</button>
+          <button class="nav-item"><span class="icon">◈</span> Product Attribute</button>
+          <button class="nav-item"><span class="icon">▣</span> Products</button>
+        </div>
+
+        <div class="side-label">Reports</div>
+        <div class="nav-group nav-sub">
+          <button class="nav-item"><span class="icon">▤</span> Sales Report</button>
+          <button class="nav-item"><span class="icon">◔</span> Product Report</button>
+          <button class="nav-item"><span class="icon">⚑</span> Settings</button>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <div class="topbar">
+          <div class="search-box">
+            <span>⌕</span>
+            <input type="search" placeholder="Search menu..." />
+          </div>
+
+          <div class="user-panel">
+            <div class="lang-chip">🌐 English</div>
+            <div class="lang-chip">🧺</div>
+            <div class="avatar">A</div>
+          </div>
+        </div>
+
+        <div class="hero-row">
+          <div class="welcome">
+            <h1>Welcome NOVA Admin</h1>
+            <p>Monitor your product catalog, sales, and store activity.</p>
+          </div>
+
+          <div class="warning-box">
+            <strong>!</strong>
+            <span>Keep an eye on stock levels for premium sneaker inventory.</span>
+          </div>
+        </div>
+
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-top">
+              <span>Total order</span>
+              <span class="mini-icon" style="background: rgba(26,140,255,0.12); color: var(--blue);">◎</span>
+            </div>
+            <div class="stat-value" id="ordersStat">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <span>Total stores</span>
+              <span class="mini-icon" style="background: rgba(60,207,145,0.12); color: var(--green);">▣</span>
+            </div>
+            <div class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <span>Total products</span>
+              <span class="mini-icon" style="background: rgba(255,173,66,0.12); color: var(--orange);">◫</span>
+            </div>
+            <div class="stat-value" id="productsStat">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <span>Total customers</span>
+              <span class="mini-icon" style="background: rgba(255,107,107,0.12); color: var(--red);">◉</span>
+            </div>
+            <div class="stat-value">7</div>
+          </div>
+        </section>
+
+        <section class="status-row">
+          <div class="status-box"><span class="dot" style="background: #5aa9ff;"></span><div class="meta"><strong id="pendingCount">0</strong><small>Pending</small></div></div>
+          <div class="status-box"><span class="dot" style="background: #46d39a;"></span><div class="meta"><strong id="confirmedCount">0</strong><small>Confirmed</small></div></div>
+          <div class="status-box"><span class="dot" style="background: #ffb857;"></span><div class="meta"><strong id="packingCount">0</strong><small>Packing</small></div></div>
+          <div class="status-box"><span class="dot" style="background: #ff7a7a;"></span><div class="meta"><strong id="deliveredCount">0</strong><small>Out for delivery</small></div></div>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Order Statistics</h3>
+              <div class="chips">
+                <span class="chip active">This year</span>
+                <span class="chip">This month</span>
+                <span class="chip">This week</span>
+              </div>
+            </div>
+            <div class="chart-area">
+              <svg class="line-graph" viewBox="0 0 700 210" preserveAspectRatio="none" aria-label="Order chart">
+                <path d="M0,155 C80,120 120,100 160,90 C240,60 290,150 340,122 C420,80 480,40 520,80 C560,120 620,90 700,65 L700,210 L0,210 Z" fill="rgba(26,140,255,0.08)"></path>
+                <path d="M0,155 C80,120 120,100 160,90 C240,60 290,150 340,122 C420,80 480,40 520,80 C560,120 620,90 700,65" fill="none" stroke="#1a8cff" stroke-width="3" stroke-linecap="round"></path>
+              </svg>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>User Overview</h3>
+            </div>
+            <div class="donut-wrap">
+              <div class="donut">
+                <div class="donut-center">7 <br><small style="font-size:0.7rem;color:var(--muted);">Users</small></div>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><span class="swatch" style="background: var(--blue);"></span> Customer (7)</div>
+              <div class="legend-item"><span class="swatch" style="background: #dfeaf8;"></span> Vendor (0)</div>
+              <div class="legend-item"><span class="swatch" style="background: #cfe0ff;"></span> Delivery Man (0)</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="bottom-grid">
+          <div class="mini-card">
+            <h3 class="mini-title">Top NOVA Products</h3>
+            <div class="product-list" id="topProductsList"></div>
+          </div>
+
+          <div class="mini-card">
+            <h3 class="mini-title">Sales Snapshot</h3>
+            <div class="product-list">
+              <div class="product-item">
+                <div class="product-info">
+                  <div class="avatar" style="width: 38px; height: 38px; font-size: 0.8rem;">N</div>
+                  <div>
+                    <strong>Revenue</strong><br>
+                    <small style="color: var(--muted);" id="salesRevenueSummary">Rs 0</small>
+                  </div>
+                </div>
+                <span class="tag">Live</span>
+              </div>
+              <div class="product-item">
+                <div class="product-info">
+                  <div class="avatar" style="width: 38px; height: 38px; font-size: 0.8rem; background: linear-gradient(135deg, #7cc5ff, #2b7ae8);">C</div>
+                  <div>
+                    <strong>Categories</strong><br>
+                    <small style="color: var(--muted);" id="categorySummary">0</small>
+                  </div>
+                </div>
+                <span class="tag orange">Active</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mini-card">
+            <h3 class="mini-title">Quick Actions</h3>
+            <div class="product-list">
+              <button class="primary-btn" type="button" id="addProductBtn" style="width:100%; margin-bottom:8px;">Add Product</button>
+              <button class="ghost-btn" type="button" id="viewProductsBtn" style="width:100%; margin-bottom:8px;">Refresh Catalog</button>
+              <button class="ghost-btn" type="button" id="viewOrdersBtn" style="width:100%;">View Orders</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="table-panel">
+          <div class="panel-header">
+            <h3>Recent Orders</h3>
+            <button class="primary-btn" id="refreshBtn" type="button">Refresh</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>State</th>
+                <th>Total</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </section>
+
+        <section class="table-panel" id="productManagerSection">
+          <div class="panel-header">
+            <h3>Catalog Manager</h3>
+          </div>
+          <div class="catalog-layout">
+            <form class="product-form" id="productForm">
+              <div class="row">
+                <div>
+                  <label for="productName">Product name</label>
+                  <input id="productName" name="name" required />
+                </div>
+                <div>
+                  <label for="productCategory">Category</label>
+                  <select id="productCategory" name="cat">
+                    <option value="Men">Men</option>
+                    <option value="Women">Women</option>
+                    <option value="Running">Running</option>
+                    <option value="Basketball">Basketball</option>
+                    <option value="Lifestyle">Lifestyle</option>
+                    <option value="Limited">Limited</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row">
+                <div>
+                  <label for="productPrice">Price</label>
+                  <input id="productPrice" name="price" type="number" min="1" required />
+                </div>
+                <div>
+                  <label for="productOld">Old price</label>
+                  <input id="productOld" name="old" type="number" min="1" />
+                </div>
+              </div>
+
+              <div>
+                <label for="productImage">Image URL</label>
+                <input id="productImage" name="img" type="url" required />
+              </div>
+
+              <div class="row">
+                <div>
+                  <label for="productTag">Tag</label>
+                  <input id="productTag" name="tag" value="NEW" />
+                </div>
+                <div>
+                  <label for="productRating">Rating</label>
+                  <input id="productRating" name="rating" value="4.8" />
+                </div>
+              </div>
+
+              <div>
+                <label for="productDesc">Description</label>
+                <textarea id="productDesc" name="desc" required></textarea>
+              </div>
+
+              <div class="action-row">
+                <button class="primary-btn" type="submit" id="saveProductBtn">Save product</button>
+                <button class="ghost-btn" type="button" id="resetProductBtn">Reset</button>
+              </div>
+            </form>
+
+            <div>
+              <div class="panel-header" style="padding:0; margin-bottom:12px;">
+                <h3 style="margin:0;">Live catalog</h3>
+              </div>
+              <div class="catalog-list" id="catalogList"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const adminSessionKey = 'nova-admin-session';
+      const loginShell = document.getElementById('loginShell');
+      const dashboardShell = document.getElementById('dashboardShell');
+      const loginForm = document.getElementById('loginForm');
+      const loginAlert = document.getElementById('loginAlert');
+      const ordersTableBody = document.getElementById('ordersTableBody');
+      const catalogList = document.getElementById('catalogList');
+      const topProductsList = document.getElementById('topProductsList');
+      const addProductBtn = document.getElementById('addProductBtn');
+      const viewProductsBtn = document.getElementById('viewProductsBtn');
+      const viewOrdersBtn = document.getElementById('viewOrdersBtn');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const productForm = document.getElementById('productForm');
+      const resetProductBtn = document.getElementById('resetProductBtn');
+      let editingProductId = null;
+      let allProducts = [];
+
+      function isLoggedIn() {
+        return Boolean(localStorage.getItem(adminSessionKey));
+      }
+
+      function showDashboard() {
+        loginShell.classList.add('hidden');
+        dashboardShell.classList.remove('hidden');
+      }
+
+      function showLogin() {
+        dashboardShell.classList.add('hidden');
+        loginShell.classList.remove('hidden');
+      }
+
+      function setAlert(container, message, type) {
+        container.textContent = message;
+        container.className = `alert ${type}`;
+        if (!message) container.style.display = 'none';
+      }
+
+      async function loginAdmin(event) {
+        event.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        try {
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.message || 'Login failed');
+
+          localStorage.setItem(adminSessionKey, JSON.stringify({ email: data.user.email, role: 'admin' }));
+          setAlert(loginAlert, '', 'error');
+          showDashboard();
+          await loadDashboard();
+        } catch (error) {
+          setAlert(loginAlert, error.message, 'error');
+        }
+      }
+
+      function renderTopProducts(products) {
+        const featured = products.slice(0, 3);
+        topProductsList.innerHTML = featured.map((product) => `
+          <div class="product-item">
+            <div class="product-info">
+              <img src="${product.img}" alt="${product.name}" />
+              <div>
+                <strong>${product.name}</strong><br>
+                <small style="color: var(--muted);">Rs ${Number(product.price || 0).toLocaleString('en-PK')}</small>
+              </div>
+            </div>
+            <span class="tag">${product.tag || 'NEW'}</span>
+          </div>
+        `).join('');
+      }
+
+      function renderCatalog(products) {
+        if (!catalogList) return;
+        catalogList.innerHTML = products.map((product) => `
+          <div class="catalog-item">
+            <img src="${product.img}" alt="${product.name}" />
+            <div class="catalog-item-body">
+              <h4>${product.name}</h4>
+              <div class="catalog-item-meta">${product.cat} · ${product.rating || '4.8'} ★</div>
+              <div class="catalog-item-price">
+                <strong>Rs ${Number(product.price || 0).toLocaleString('en-PK')}</strong>
+                <span class="tag">${product.tag || 'NEW'}</span>
+              </div>
+              <div class="catalog-item-actions">
+                <button class="mini-btn" type="button" data-edit="${product.id}">Edit</button>
+                <button class="danger-btn" type="button" data-delete="${product.id}">Delete</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        catalogList.querySelectorAll('[data-edit]').forEach((button) => {
+          button.addEventListener('click', () => loadProductIntoForm(button.dataset.edit));
+        });
+
+        catalogList.querySelectorAll('[data-delete]').forEach((button) => {
+          button.addEventListener('click', () => deleteProduct(button.dataset.delete));
+        });
+      }
+
+      function resetProductForm() {
+        productForm.reset();
+        editingProductId = null;
+        document.getElementById('productCategory').value = 'Men';
+        document.getElementById('productTag').value = 'NEW';
+        document.getElementById('productRating').value = '4.8';
+      }
+
+      function loadProductIntoForm(productId) {
+        const product = allProducts.find((item) => String(item.id) === String(productId));
+        if (!product) return;
+
+        editingProductId = productId;
+        document.getElementById('productName').value = product.name || '';
+        document.getElementById('productCategory').value = product.cat || 'Men';
+        document.getElementById('productPrice').value = product.price || 0;
+        document.getElementById('productOld').value = product.old || product.price || 0;
+        document.getElementById('productImage').value = product.img || '';
+        document.getElementById('productTag').value = product.tag || 'NEW';
+        document.getElementById('productRating').value = product.rating || '4.8';
+        document.getElementById('productDesc').value = product.desc || '';
+        document.getElementById('productManagerSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      async function deleteProduct(productId) {
+        const confirmDelete = window.confirm('Delete this product from the live catalog?');
+        if (!confirmDelete) return;
+
+        try {
+          const response = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.message || 'Delete failed');
+          await loadDashboard();
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      async function handleProductSubmit(event) {
+        event.preventDefault();
+
+        const payload = {
+          name: document.getElementById('productName').value.trim(),
+          cat: document.getElementById('productCategory').value,
+          price: Number(document.getElementById('productPrice').value),
+          old: Number(document.getElementById('productOld').value || document.getElementById('productPrice').value),
+          img: document.getElementById('productImage').value.trim(),
+          tag: document.getElementById('productTag').value.trim() || 'NEW',
+          rating: document.getElementById('productRating').value.trim() || '4.8',
+          desc: document.getElementById('productDesc').value.trim(),
+        };
+
+        if (!payload.name || !payload.img || !payload.price) {
+          window.alert('Product name, image, and price are required.');
+          return;
+        }
+
+        try {
+          const url = editingProductId ? `/api/products/${editingProductId}` : '/api/products';
+          const method = editingProductId ? 'PUT' : 'POST';
+          const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.message || 'Could not save product');
+
+          resetProductForm();
+          await loadDashboard();
+        } catch (error) {
+          window.alert(error.message || 'Product save failed');
+        }
+      }
+
+      async function loadDashboard() {
+        try {
+          const [statsResponse, ordersResponse, productsResponse] = await Promise.all([
+            fetch('/api/admin/stats'),
+            fetch('/api/orders'),
+            fetch('/api/products')
+          ]);
+
+          if (statsResponse.ok) {
+            const stats = await statsResponse.json();
+            document.getElementById('ordersStat').textContent = stats.orders || 0;
+            document.getElementById('productsStat').textContent = stats.products || 0;
+            document.getElementById('categorySummary').textContent = stats.activeCategories || 0;
+            document.getElementById('salesRevenueSummary').textContent = `Rs ${Number(stats.revenue || 0).toLocaleString('en-PK')}`;
+            document.getElementById('pendingCount').textContent = Math.max(0, Number(stats.orders || 0) - 1);
+            document.getElementById('confirmedCount').textContent = '1';
+            document.getElementById('packingCount').textContent = '0';
+            document.getElementById('deliveredCount').textContent = '0';
+          }
+
+          if (ordersResponse.ok) {
+            const orders = await ordersResponse.json();
+            ordersTableBody.innerHTML = orders.slice(0, 4).map((order) => {
+              const status = (order.status || 'Processing').toLowerCase();
+              let statusClass = 'pending';
+              if (status === 'paid' || status === 'confirmed') statusClass = 'status-pill';
+              if (status === 'cancelled') statusClass = 'status-pill cancelled';
+              return `
+                <tr>
+                  <td>${order.id}</td>
+                  <td>${order.customer}</td>
+                  <td><span class="status-pill ${statusClass === 'status-pill' ? '' : statusClass}">${order.status}</span></td>
+                  <td>Rs ${Number(order.total || 0).toLocaleString('en-PK')}</td>
+                  <td>${order.date}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+
+          if (productsResponse.ok) {
+            allProducts = await productsResponse.json();
+            document.getElementById('productsStat').textContent = allProducts.length;
+            renderCatalog(allProducts);
+            renderTopProducts(allProducts);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      addProductBtn.addEventListener('click', () => {
+        resetProductForm();
+        document.getElementById('productManagerSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      viewProductsBtn.addEventListener('click', () => {
+        loadDashboard();
+      });
+
+      viewOrdersBtn.addEventListener('click', () => {
+        document.getElementById('ordersTableBody').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      refreshBtn.addEventListener('click', loadDashboard);
+      resetProductBtn.addEventListener('click', resetProductForm);
+      productForm.addEventListener('submit', handleProductSubmit);
+      loginForm.addEventListener('submit', loginAdmin);
+
+      if (isLoggedIn()) {
+        showDashboard();
+        loadDashboard();
+      } else {
+        showLogin();
+      }
+    </script>
+  </body>
+</html>

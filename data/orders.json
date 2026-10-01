@@ -1,0 +1,5 @@
+[
+  { "id": "ORD-101", "customer": "Ahsan", "total": 18990, "status": "Paid", "date": "2026-09-25" },
+  { "id": "ORD-102", "customer": "Salma", "total": 22990, "status": "Packed", "date": "2026-09-27" },
+  { "id": "ORD-103", "customer": "Usman", "total": 14990, "status": "Processing", "date": "2026-09-29" }
+]
