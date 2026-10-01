@@ -742,6 +742,21 @@
       .field input { border-radius: 5px; }
       .sidebar { background: linear-gradient(180deg, #123f67 0%, #0d3153 100%); }
       .login-shell { background: #f4f6f8; }
+      .nav-notice {
+        position: fixed;
+        z-index: 30;
+        top: 18px;
+        right: 20px;
+        max-width: min(380px, calc(100vw - 32px));
+        padding: 12px 16px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        box-shadow: var(--shadow);
+        color: var(--text);
+        display: none;
+      }
+      .nav-notice.show { display: block; }
     </style>
   </head>
   <body>
@@ -808,6 +823,7 @@
             <div class="avatar">A</div>
           </div>
         </div>
+        <div class="nav-notice" id="navNotice" role="status" aria-live="polite"></div>
 
         <div class="hero-row">
           <div class="welcome">
@@ -859,7 +875,7 @@
           <div class="status-box"><span class="dot" style="background: #ff7a7a;"></span><div class="meta"><strong id="deliveredCount">0</strong><small>Out for delivery</small></div></div>
         </section>
 
-        <section class="content-grid">
+        <section class="content-grid" id="salesReportSection">
           <div class="panel">
             <div class="panel-header">
               <h3>Order Statistics</h3>
@@ -936,7 +952,7 @@
           </div>
         </section>
 
-        <section class="table-panel">
+        <section class="table-panel" id="ordersSection">
           <div class="panel-header">
             <h3>Recent Orders</h3>
             <button class="primary-btn" id="refreshBtn" type="button">Refresh</button>
@@ -1046,6 +1062,8 @@
       const refreshBtn = document.getElementById('refreshBtn');
       const productForm = document.getElementById('productForm');
       const resetProductBtn = document.getElementById('resetProductBtn');
+      const navNotice = document.getElementById('navNotice');
+      let navNoticeTimer = null;
       const apiBaseUrl = (document.querySelector('meta[name="nova-api-base-url"]')?.content || '').trim().replace(/\/$/, '');
       let supabaseConfigPromise;
       let editingProductId = null;
@@ -1269,6 +1287,45 @@
         container.className = `alert ${type}`;
         if (!message) container.style.display = 'none';
       }
+
+      function showNavNotice(message) {
+        navNotice.textContent = message;
+        navNotice.classList.add('show');
+        clearTimeout(navNoticeTimer);
+        navNoticeTimer = setTimeout(() => navNotice.classList.remove('show'), 3500);
+      }
+
+      const navTargets = {
+        Dashboard: document.querySelector('.hero-row'),
+        Orders: document.getElementById('ordersSection'),
+        'Category Setup': document.getElementById('productCategory'),
+        'Product Attribute': document.getElementById('productTag'),
+        Products: document.getElementById('productManagerSection'),
+        'Sales Report': document.getElementById('salesRevenueSummary')?.closest('.mini-card'),
+        'Product Report': document.getElementById('productManagerSection'),
+      };
+
+      document.querySelectorAll('.sidebar .nav-item').forEach((button) => {
+        button.addEventListener('click', () => {
+          const label = button.textContent.replace(button.querySelector('.icon')?.textContent || '', '').trim();
+          const target = navTargets[label];
+          if (!target) {
+            const messages = {
+              POS: 'POS is not connected to an order/payment workflow yet.',
+              Customers: 'Customer records are not connected to the current backend yet.',
+              Brands: 'Brand management is not part of the current product schema yet.',
+              Settings: 'Settings are not connected to persistent backend configuration yet.',
+            };
+            showNavNotice(messages[label] || `${label} is not available yet.`);
+            return;
+          }
+
+          document.querySelectorAll('.sidebar .nav-item').forEach((item) => item.classList.toggle('active', item === button));
+          const scrollTarget = target.matches('input, select, textarea') ? target.closest('#productManagerSection') : target;
+          scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (target.matches('input, select, textarea')) target.focus({ preventScroll: true });
+        });
+      });
 
       async function loginAdmin(event) {
         event.preventDefault();
