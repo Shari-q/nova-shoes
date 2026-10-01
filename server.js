@@ -159,6 +159,11 @@ function getOrders() {
   return readJson(ordersFile, defaultOrders);
 }
 
+function saveOrders(list) {
+  ensureDataFiles();
+  fs.writeFileSync(ordersFile, JSON.stringify(list, null, 2));
+}
+
 function normalizeProduct(product, index = 0) {
   const name = String(product.name || `Product ${index + 1}`).trim();
   const slug = String(product.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `product-${index + 1}`).trim();
@@ -248,6 +253,27 @@ app.delete('/api/products/:id', (req, res) => {
 
 app.get('/api/orders', (req, res) => {
   res.json(getOrders());
+});
+
+app.post('/api/orders', (req, res) => {
+  const payload = req.body || {};
+  const customer = String(payload.customer || '').trim();
+  const total = Number(payload.total || 0);
+  if (!customer || !Number.isFinite(total) || total <= 0) {
+    return res.status(400).json({ message: 'Customer and a positive order total are required.' });
+  }
+
+  const order = {
+    id: `ORD-${Date.now()}`,
+    customer,
+    total,
+    status: 'Processing',
+    date: new Date().toISOString().slice(0, 10),
+  };
+  const orders = getOrders();
+  orders.unshift(order);
+  saveOrders(orders);
+  res.status(201).json(order);
 });
 
 app.get('/api/admin/stats', (req, res) => {

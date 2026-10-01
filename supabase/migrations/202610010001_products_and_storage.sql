@@ -72,6 +72,13 @@ create policy "NOVA admins can read orders"
   to authenticated
   using (public.is_nova_admin());
 
+drop policy if exists "NOVA admins can manage orders" on public.orders;
+create policy "NOVA admins can manage orders"
+  on public.orders for all
+  to authenticated
+  using (public.is_nova_admin())
+  with check (public.is_nova_admin());
+
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
   'product-images',

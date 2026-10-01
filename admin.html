@@ -757,6 +757,12 @@
         display: none;
       }
       .nav-notice.show { display: block; }
+      .admin-page-view { display: none; }
+      .admin-page-view.active { display: block; }
+      .admin-page-header { margin: 0 0 18px; }
+      .admin-page-header h1 { margin: 0 0 4px; font-size: 1.55rem; }
+      .admin-page-header p { margin: 0; color: var(--muted); }
+      .admin-page-content { min-height: 240px; }
     </style>
   </head>
   <body>
@@ -825,6 +831,7 @@
         </div>
         <div class="nav-notice" id="navNotice" role="status" aria-live="polite"></div>
 
+        <section class="admin-page-view active" data-admin-page="dashboard">
         <div class="hero-row">
           <div class="welcome">
             <h1>Welcome NOVA Admin</h1>
@@ -951,7 +958,9 @@
             </div>
           </div>
         </section>
+        </section>
 
+        <section class="admin-page-view" data-admin-page="orders">
         <section class="table-panel" id="ordersSection">
           <div class="panel-header">
             <h3>Recent Orders</h3>
@@ -970,7 +979,9 @@
             <tbody id="ordersTableBody"></tbody>
           </table>
         </section>
+        </section>
 
+        <section class="admin-page-view" data-admin-page="products">
         <section class="table-panel" id="productManagerSection">
           <div class="panel-header">
             <h3>Catalog Manager</h3>
@@ -1044,6 +1055,40 @@
             </div>
           </div>
         </section>
+        </section>
+
+        <section class="admin-page-view" data-admin-page="pos">
+          <header class="admin-page-header"><h1>Point of Sale</h1><p>Create an order from the NOVA catalog.</p></header>
+          <div class="admin-page-content" id="posPageContent"></div>
+        </section>
+        <section class="admin-page-view" data-admin-page="customers">
+          <header class="admin-page-header"><h1>Customers</h1><p>Customers found in order records.</p></header>
+          <div class="admin-page-content" id="customersPageContent"></div>
+        </section>
+        <section class="admin-page-view" data-admin-page="categories">
+          <header class="admin-page-header"><h1>Category Setup</h1><p>Browse and manage the product categories currently in use.</p></header>
+          <div class="admin-page-content" id="categoriesPageContent"></div>
+        </section>
+        <section class="admin-page-view" data-admin-page="brands">
+          <header class="admin-page-header"><h1>Brands</h1><p>Brands currently assigned to catalog products.</p></header>
+          <div class="admin-page-content" id="brandsPageContent"></div>
+        </section>
+        <section class="admin-page-view" data-admin-page="attributes">
+          <header class="admin-page-header"><h1>Product Attributes</h1><p>Tags and ratings used across the catalog.</p></header>
+          <div class="admin-page-content" id="attributesPageContent"></div>
+        </section>
+        <section class="admin-page-view" data-admin-page="sales-report">
+          <header class="admin-page-header"><h1>Sales Report</h1><p>Revenue and order totals from recorded orders.</p></header>
+          <div class="admin-page-content" id="salesReportPageContent"></div>
+        </section>
+        <section class="admin-page-view" data-admin-page="product-report">
+          <header class="admin-page-header"><h1>Product Report</h1><p>Current catalog grouped by product performance and category.</p></header>
+          <div class="admin-page-content" id="productReportPageContent"></div>
+        </section>
+        <section class="admin-page-view" data-admin-page="settings">
+          <header class="admin-page-header"><h1>Settings</h1><p>Database, storage, and admin connection status.</p></header>
+          <div class="admin-page-content" id="settingsPageContent"></div>
+        </section>
       </main>
     </div>
 
@@ -1068,6 +1113,9 @@
       let supabaseConfigPromise;
       let editingProductId = null;
       let allProducts = [];
+      let allOrders = [];
+      let posCart = [];
+      let currentAdminPage = 'dashboard';
 
       function getSupabaseConfig() {
         supabaseConfigPromise ||= fetch(new URL('supabase-config.json', location.href))
@@ -1225,6 +1273,22 @@
           return supabaseRest(config, 'orders?select=*&order=date.desc', 'GET', undefined, { admin: true });
         }
 
+        if (path === '/api/orders' && method === 'POST') {
+          const payload = JSON.parse(options.body || '{}');
+          const order = {
+            id: `ORD-${Date.now()}`,
+            customer: String(payload.customer || '').trim(),
+            total: Number(payload.total || 0),
+            status: 'Processing',
+            date: new Date().toISOString().slice(0, 10),
+          };
+          if (!order.customer || !Number.isFinite(order.total) || order.total <= 0) {
+            throw new Error('Customer and a positive order total are required.');
+          }
+          const rows = await supabaseRest(config, 'orders?select=*', 'POST', order, { admin: true, prefer: 'return=representation' });
+          return rows[0];
+        }
+
         if (path === '/api/admin/stats' && method === 'GET') {
           const [products, orders] = await Promise.all([
             supabaseRest(config, 'products?select=cat', 'GET', undefined, { admin: true }),
@@ -1275,6 +1339,7 @@
       function showDashboard() {
         loginShell.classList.add('hidden');
         dashboardShell.classList.remove('hidden');
+        showAdminPage(location.hash.slice(1) || 'dashboard');
       }
 
       function showLogin() {
@@ -1295,37 +1360,42 @@
         navNoticeTimer = setTimeout(() => navNotice.classList.remove('show'), 3500);
       }
 
-      const navTargets = {
-        Dashboard: document.querySelector('.hero-row'),
-        Orders: document.getElementById('ordersSection'),
-        'Category Setup': document.getElementById('productCategory'),
-        'Product Attribute': document.getElementById('productTag'),
-        Products: document.getElementById('productManagerSection'),
-        'Sales Report': document.getElementById('salesRevenueSummary')?.closest('.mini-card'),
-        'Product Report': document.getElementById('productManagerSection'),
+      const navPages = {
+        Dashboard: 'dashboard',
+        POS: 'pos',
+        Orders: 'orders',
+        Customers: 'customers',
+        'Category Setup': 'categories',
+        Brands: 'brands',
+        'Product Attribute': 'attributes',
+        Products: 'products',
+        'Sales Report': 'sales-report',
+        'Product Report': 'product-report',
+        Settings: 'settings',
       };
+
+      function showAdminPage(page) {
+        const view = document.querySelector(`[data-admin-page="${page}"]`);
+        if (!view) return;
+        currentAdminPage = page;
+        document.querySelectorAll('[data-admin-page]').forEach((item) => item.classList.toggle('active', item === view));
+        document.querySelectorAll('.sidebar .nav-item').forEach((button) => {
+          const label = button.textContent.replace(button.querySelector('.icon')?.textContent || '', '').trim();
+          button.classList.toggle('active', navPages[label] === page);
+        });
+        if (location.hash !== `#${page}`) history.replaceState(null, '', `#${page}`);
+        renderAdminPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 
       document.querySelectorAll('.sidebar .nav-item').forEach((button) => {
         button.addEventListener('click', () => {
           const label = button.textContent.replace(button.querySelector('.icon')?.textContent || '', '').trim();
-          const target = navTargets[label];
-          if (!target) {
-            const messages = {
-              POS: 'POS is not connected to an order/payment workflow yet.',
-              Customers: 'Customer records are not connected to the current backend yet.',
-              Brands: 'Brand management is not part of the current product schema yet.',
-              Settings: 'Settings are not connected to persistent backend configuration yet.',
-            };
-            showNavNotice(messages[label] || `${label} is not available yet.`);
-            return;
-          }
-
-          document.querySelectorAll('.sidebar .nav-item').forEach((item) => item.classList.toggle('active', item === button));
-          const scrollTarget = target.matches('input, select, textarea') ? target.closest('#productManagerSection') : target;
-          scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          if (target.matches('input, select, textarea')) target.focus({ preventScroll: true });
+          showAdminPage(navPages[label]);
         });
       });
+
+      window.addEventListener('hashchange', () => showAdminPage(location.hash.slice(1) || 'dashboard'));
 
       async function loginAdmin(event) {
         event.preventDefault();
@@ -1423,6 +1493,174 @@
         catalogList.querySelectorAll('[data-delete]').forEach((button) => {
           button.addEventListener('click', () => deleteProduct(button.dataset.delete));
         });
+      }
+
+      function escapeAdminText(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        })[character]);
+      }
+
+      function formatAdminMoney(value) {
+        return `Rs ${Number(value || 0).toLocaleString('en-PK')}`;
+      }
+
+      function renderAdminTable(headers, rows, emptyMessage) {
+        if (!rows.length) return `<div class="panel"><p>${escapeAdminText(emptyMessage)}</p></div>`;
+        return `<div class="table-panel"><table><thead><tr>${headers.map((header) => `<th>${escapeAdminText(header)}</th>`).join('')}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+      }
+
+      function renderOrdersPage() {
+        const target = document.getElementById('ordersPageContent');
+        const rows = allOrders.map((order) => [
+          escapeAdminText(order.id),
+          escapeAdminText(order.customer),
+          `<span class="status-pill">${escapeAdminText(order.status)}</span>`,
+          formatAdminMoney(order.total),
+          escapeAdminText(order.date),
+        ]);
+        target.innerHTML = renderAdminTable(['Order ID', 'Customer', 'Status', 'Total', 'Date'], rows, 'No orders recorded yet.');
+      }
+
+      function renderPosPage() {
+        const target = document.getElementById('posPageContent');
+        target.innerHTML = `
+          <div class="panel">
+            <div class="product-form">
+              <div class="row">
+                <div><label for="posCustomer">Customer name</label><input id="posCustomer" placeholder="Walk-in customer" /></div>
+                <div><label for="posProduct">Product</label><select id="posProduct">${allProducts.map((product) => `<option value="${escapeAdminText(product.id)}">${escapeAdminText(product.name)} · ${formatAdminMoney(product.price)}</option>`).join('')}</select></div>
+              </div>
+              <div class="action-row"><label for="posQuantity">Quantity</label><input id="posQuantity" type="number" min="1" value="1" style="max-width:100px" /><button class="primary-btn" type="button" id="posAddItem">Add item</button></div>
+            </div>
+          </div>
+          <div class="panel" style="margin-top:16px"><div class="panel-header"><h3>Current sale</h3><strong id="posTotal">Rs 0</strong></div><div id="posCartLines"></div><button class="primary-btn" type="button" id="posCreateOrder" disabled>Record order</button></div>`;
+
+        const renderCart = () => {
+          const lines = document.getElementById('posCartLines');
+          const total = posCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+          lines.innerHTML = posCart.length
+            ? posCart.map((item, index) => `<div class="product-item"><span>${escapeAdminText(item.name)} × ${item.quantity}</span><strong>${formatAdminMoney(item.price * item.quantity)}</strong><button class="mini-btn" type="button" data-pos-remove="${index}">Remove</button></div>`).join('')
+            : '<p>No items in this sale.</p>';
+          document.getElementById('posTotal').textContent = formatAdminMoney(total);
+          document.getElementById('posCreateOrder').disabled = !posCart.length;
+          lines.querySelectorAll('[data-pos-remove]').forEach((button) => button.addEventListener('click', () => {
+            posCart.splice(Number(button.dataset.posRemove), 1);
+            renderCart();
+          }));
+        };
+
+        document.getElementById('posAddItem').addEventListener('click', () => {
+          const product = allProducts.find((item) => String(item.id) === document.getElementById('posProduct').value);
+          const quantity = Math.max(1, Number(document.getElementById('posQuantity').value || 1));
+          if (!product) return showNavNotice('Add a product to the catalog before creating a sale.');
+          posCart.push({ name: product.name, price: Number(product.price), quantity });
+          renderCart();
+        });
+
+        document.getElementById('posCreateOrder').addEventListener('click', async () => {
+          const customer = document.getElementById('posCustomer').value.trim() || 'Walk-in customer';
+          const total = posCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+          try {
+            const order = await apiRequest('/api/orders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ customer, total }),
+            });
+            posCart = [];
+            await loadDashboard();
+            showAdminPage('orders');
+            showNavNotice(`Order ${order.id} recorded.`);
+          } catch (error) {
+            showNavNotice(error.message || 'Could not record order.');
+          }
+        });
+        renderCart();
+      }
+
+      function renderCustomersPage() {
+        const customers = new Map();
+        allOrders.forEach((order) => {
+          const name = String(order.customer || 'Customer');
+          const record = customers.get(name) || { orders: 0, spent: 0, lastOrder: order.date || '' };
+          record.orders += 1;
+          record.spent += Number(order.total || 0);
+          if (String(order.date || '') > record.lastOrder) record.lastOrder = order.date;
+          customers.set(name, record);
+        });
+        const rows = [...customers.entries()].map(([name, record]) => [
+          escapeAdminText(name), String(record.orders), formatAdminMoney(record.spent), escapeAdminText(record.lastOrder),
+        ]);
+        document.getElementById('customersPageContent').innerHTML = renderAdminTable(['Customer', 'Orders', 'Total spent', 'Last order'], rows, 'Customers appear here after orders are recorded.');
+      }
+
+      function renderCategoriesPage() {
+        const counts = new Map();
+        allProducts.forEach((product) => counts.set(product.cat, (counts.get(product.cat) || 0) + 1));
+        const rows = [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([name, count]) => [escapeAdminText(name), String(count)]);
+        document.getElementById('categoriesPageContent').innerHTML = renderAdminTable(['Category', 'Products'], rows, 'No categories in the catalog yet.');
+      }
+
+      function renderBrandsPage() {
+        const brands = new Map();
+        allProducts.forEach((product) => {
+          if (product.brand) brands.set(product.brand, (brands.get(product.brand) || 0) + 1);
+        });
+        const rows = [...brands.entries()].map(([brand, count]) => [escapeAdminText(brand), String(count)]);
+        document.getElementById('brandsPageContent').innerHTML = renderAdminTable(['Brand', 'Products'], rows, 'Brand data is not part of the current product schema. Add a brand field before managing brands here.');
+      }
+
+      function renderAttributesPage() {
+        const counts = new Map();
+        allProducts.forEach((product) => {
+          const tag = product.tag || 'UNTAGGED';
+          counts.set(tag, (counts.get(tag) || 0) + 1);
+        });
+        const rows = [...counts.entries()].map(([tag, count]) => [escapeAdminText(tag), String(count)]);
+        document.getElementById('attributesPageContent').innerHTML = renderAdminTable(['Product tag', 'Products'], rows, 'No product attributes are available.');
+      }
+
+      function renderSalesReportPage() {
+        const total = allOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+        const paid = allOrders.filter((order) => ['paid', 'confirmed', 'delivered'].includes(String(order.status).toLowerCase()));
+        const rows = [
+          ['Recorded orders', String(allOrders.length)],
+          ['Recorded order value', formatAdminMoney(total)],
+          ['Paid/confirmed order count', String(paid.length)],
+          ['Paid/confirmed order value', formatAdminMoney(paid.reduce((sum, order) => sum + Number(order.total || 0), 0))],
+        ];
+        document.getElementById('salesReportPageContent').innerHTML = renderAdminTable(['Metric', 'Value'], rows, 'No order data available.');
+      }
+
+      function renderProductReportPage() {
+        const rows = [...allProducts]
+          .sort((a, b) => Number(b.price || 0) - Number(a.price || 0))
+          .map((product) => [escapeAdminText(product.name), escapeAdminText(product.cat), formatAdminMoney(product.price), escapeAdminText(product.tag)]);
+        document.getElementById('productReportPageContent').innerHTML = renderAdminTable(['Product', 'Category', 'Price', 'Tag'], rows, 'No products available.');
+      }
+
+      async function renderSettingsPage() {
+        const config = await getSupabaseConfig();
+        const session = getStoredSupabaseSession();
+        const rows = [
+          ['Database provider', config ? 'Supabase configured' : 'Local JSON API'],
+          ['Product image storage', config ? config.storageBucket : 'External image URLs'],
+          ['Admin session', session?.email || 'Not signed in'],
+          ['API mode', config ? 'Shared cloud catalog' : `Local backend at ${apiBaseUrl}`],
+        ];
+        document.getElementById('settingsPageContent').innerHTML = renderAdminTable(['Setting', 'Current value'], rows, 'No settings available.');
+      }
+
+      function renderAdminPage(page) {
+        if (page === 'pos') return renderPosPage();
+        if (page === 'orders') return renderOrdersPage();
+        if (page === 'customers') return renderCustomersPage();
+        if (page === 'categories') return renderCategoriesPage();
+        if (page === 'brands') return renderBrandsPage();
+        if (page === 'attributes') return renderAttributesPage();
+        if (page === 'sales-report') return renderSalesReportPage();
+        if (page === 'product-report') return renderProductReportPage();
+        if (page === 'settings') return renderSettingsPage();
       }
 
       function resetProductForm() {
@@ -1540,10 +1778,12 @@
             `;
           }).join('');
 
+          allOrders = orders;
           allProducts = products;
           document.getElementById('productsStat').textContent = allProducts.length;
           renderCatalog(allProducts);
           renderTopProducts(allProducts);
+          renderAdminPage(currentAdminPage);
         } catch (error) {
           console.error(error);
         }
