@@ -120,6 +120,17 @@ Then open:
 http://localhost:8000
 ```
 
+## Admin backend deployment
+
+GitHub Pages serves static files only; it cannot run `server.js` or provide `/api/login`. To use the admin from the deployed site:
+
+1. Deploy the repository root as a Node.js web service with `npm install` as the build command and `npm start` as the start command.
+2. Set `NOVA_ADMIN_EMAIL`, `NOVA_ADMIN_PASSWORD`, and `NOVA_ALLOWED_ORIGINS=https://shari-g.github.io` in the backend host's environment settings.
+3. Set the `nova-api-base-url` meta tag in `admin.html` to the backend's HTTPS origin, for example `https://your-service.example.com`.
+4. Publish the updated `admin.html` to GitHub Pages.
+
+The backend stores products and orders in JSON files under `data/`; use persistent storage or a database before relying on it for live store operations. Do not use the built-in development password on a public deployment.
+
 ## Sanity product catalog
 
 The storefront reads published products from a public Sanity dataset and keeps the built-in catalog as a fallback. Product fields include name, slug, category, prices, image, label, rating, description, and sort order.

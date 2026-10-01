@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NOVA Admin Dashboard</title>
+    <meta name="nova-api-base-url" content="" />
     <style>
       :root {
         --bg: #f4f7fb;
@@ -1018,8 +1019,33 @@
       const refreshBtn = document.getElementById('refreshBtn');
       const productForm = document.getElementById('productForm');
       const resetProductBtn = document.getElementById('resetProductBtn');
+      const apiBaseUrl = (document.querySelector('meta[name="nova-api-base-url"]')?.content || '').trim().replace(/\/$/, '');
       let editingProductId = null;
       let allProducts = [];
+
+      async function apiRequest(path, options) {
+        let response;
+        try {
+          response = await fetch(`${apiBaseUrl}${path}`, options);
+        } catch (error) {
+          if (!apiBaseUrl) {
+            throw new Error('Admin backend is not connected. GitHub Pages only hosts the website. Deploy server.js, then set the nova-api-base-url value in admin.html to your backend URL.');
+          }
+          throw new Error(`Could not reach the admin backend at ${apiBaseUrl}. Check that it is running and allows this website in its CORS settings.`);
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          if (!apiBaseUrl) {
+            throw new Error('Admin backend is not connected. GitHub Pages returned a web page instead of API data. Deploy server.js, then set the nova-api-base-url value in admin.html to your backend URL.');
+          }
+          throw new Error(`The admin backend returned a non-JSON response (HTTP ${response.status}). Check the backend URL and API route.`);
+        }
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || `Request failed (HTTP ${response.status})`);
+        return data;
+      }
 
       function isLoggedIn() {
         return Boolean(localStorage.getItem(adminSessionKey));
@@ -1047,14 +1073,11 @@
         const password = document.getElementById('password').value.trim();
 
         try {
-          const response = await fetch('/api/login', {
+          const data = await apiRequest('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
           });
-
-          const data = await response.json();
-          if (!response.ok) throw new Error(data.message || 'Login failed');
 
           localStorage.setItem(adminSessionKey, JSON.stringify({ email: data.user.email, role: 'admin' }));
           setAlert(loginAlert, '', 'error');
@@ -1139,9 +1162,7 @@
         if (!confirmDelete) return;
 
         try {
-          const response = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
-          const data = await response.json();
-          if (!response.ok) throw new Error(data.message || 'Delete failed');
+          await apiRequest(`/api/products/${encodeURIComponent(productId)}`, { method: 'DELETE' });
           await loadDashboard();
         } catch (error) {
           console.error(error);
@@ -1170,14 +1191,11 @@
         try {
           const url = editingProductId ? `/api/products/${editingProductId}` : '/api/products';
           const method = editingProductId ? 'PUT' : 'POST';
-          const response = await fetch(url, {
+          await apiRequest(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
-
-          const data = await response.json();
-          if (!response.ok) throw new Error(data.message || 'Could not save product');
 
           resetProductForm();
           await loadDashboard();
@@ -1188,49 +1206,41 @@
 
       async function loadDashboard() {
         try {
-          const [statsResponse, ordersResponse, productsResponse] = await Promise.all([
-            fetch('/api/admin/stats'),
-            fetch('/api/orders'),
-            fetch('/api/products')
+          const [stats, orders, products] = await Promise.all([
+            apiRequest('/api/admin/stats'),
+            apiRequest('/api/orders'),
+            apiRequest('/api/products')
           ]);
 
-          if (statsResponse.ok) {
-            const stats = await statsResponse.json();
-            document.getElementById('ordersStat').textContent = stats.orders || 0;
-            document.getElementById('productsStat').textContent = stats.products || 0;
-            document.getElementById('categorySummary').textContent = stats.activeCategories || 0;
-            document.getElementById('salesRevenueSummary').textContent = `Rs ${Number(stats.revenue || 0).toLocaleString('en-PK')}`;
-            document.getElementById('pendingCount').textContent = Math.max(0, Number(stats.orders || 0) - 1);
-            document.getElementById('confirmedCount').textContent = '1';
-            document.getElementById('packingCount').textContent = '0';
-            document.getElementById('deliveredCount').textContent = '0';
-          }
+          document.getElementById('ordersStat').textContent = stats.orders || 0;
+          document.getElementById('productsStat').textContent = stats.products || 0;
+          document.getElementById('categorySummary').textContent = stats.activeCategories || 0;
+          document.getElementById('salesRevenueSummary').textContent = `Rs ${Number(stats.revenue || 0).toLocaleString('en-PK')}`;
+          document.getElementById('pendingCount').textContent = Math.max(0, Number(stats.orders || 0) - 1);
+          document.getElementById('confirmedCount').textContent = '1';
+          document.getElementById('packingCount').textContent = '0';
+          document.getElementById('deliveredCount').textContent = '0';
 
-          if (ordersResponse.ok) {
-            const orders = await ordersResponse.json();
-            ordersTableBody.innerHTML = orders.slice(0, 4).map((order) => {
-              const status = (order.status || 'Processing').toLowerCase();
-              let statusClass = 'pending';
-              if (status === 'paid' || status === 'confirmed') statusClass = 'status-pill';
-              if (status === 'cancelled') statusClass = 'status-pill cancelled';
-              return `
-                <tr>
-                  <td>${order.id}</td>
-                  <td>${order.customer}</td>
-                  <td><span class="status-pill ${statusClass === 'status-pill' ? '' : statusClass}">${order.status}</span></td>
-                  <td>Rs ${Number(order.total || 0).toLocaleString('en-PK')}</td>
-                  <td>${order.date}</td>
-                </tr>
-              `;
-            }).join('');
-          }
+          ordersTableBody.innerHTML = orders.slice(0, 4).map((order) => {
+            const status = (order.status || 'Processing').toLowerCase();
+            let statusClass = 'pending';
+            if (status === 'paid' || status === 'confirmed') statusClass = 'status-pill';
+            if (status === 'cancelled') statusClass = 'status-pill cancelled';
+            return `
+              <tr>
+                <td>${order.id}</td>
+                <td>${order.customer}</td>
+                <td><span class="status-pill ${statusClass === 'status-pill' ? '' : statusClass}">${order.status}</span></td>
+                <td>Rs ${Number(order.total || 0).toLocaleString('en-PK')}</td>
+                <td>${order.date}</td>
+              </tr>
+            `;
+          }).join('');
 
-          if (productsResponse.ok) {
-            allProducts = await productsResponse.json();
-            document.getElementById('productsStat').textContent = allProducts.length;
-            renderCatalog(allProducts);
-            renderTopProducts(allProducts);
-          }
+          allProducts = products;
+          document.getElementById('productsStat').textContent = allProducts.length;
+          renderCatalog(allProducts);
+          renderTopProducts(allProducts);
         } catch (error) {
           console.error(error);
         }

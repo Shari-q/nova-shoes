@@ -8,6 +8,10 @@ const rootDir = __dirname;
 const dataDir = path.join(rootDir, 'data');
 const productsFile = path.join(dataDir, 'products.json');
 const ordersFile = path.join(dataDir, 'orders.json');
+const allowedOrigins = (process.env.NOVA_ALLOWED_ORIGINS || 'https://shari-g.github.io,http://localhost:3000,http://127.0.0.1:3000')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const adminCredentials = {
   email: process.env.NOVA_ADMIN_EMAIL || 'admin@nova.com',
@@ -170,6 +174,18 @@ function normalizeProduct(product, index = 0) {
   return { id, name, slug, cat, price, old, img, tag, rating, desc };
 }
 
+app.use((req, res, next) => {
+  const origin = req.get('origin');
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(origin && !allowedOrigins.includes(origin) ? 403 : 204);
+  next();
+});
+
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(rootDir));
 
@@ -263,6 +279,10 @@ app.post('/api/login', (req, res) => {
     success: true,
     user: { email: adminCredentials.email, role: 'admin' },
   });
+});
+
+app.use('/api', (req, res) => {
+  res.status(404).json({ message: 'API route not found.' });
 });
 
 app.get('/admin', (req, res) => {
