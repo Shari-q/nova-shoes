@@ -120,13 +120,19 @@ Then open:
 http://localhost:8000
 ```
 
-## Local Admin and Catalog
+## Supabase Catalog and Image Storage
 
-GitHub Pages serves the storefront and admin UI, while the API runs on your computer. From the project root, run `npm start` and keep the terminal open. The server listens at `http://localhost:3002`.
+GitHub Pages is static hosting, so the shared catalog now connects directly to Supabase Postgres and Supabase Storage. `supabase-config.json` contains only the public project URL and anon key; database row-level security restricts writes to the admin allowlist. Never put a service-role key in that file or in browser code.
 
-Open `https://shari-q.github.io/nova-shoes/admin` on the same computer and sign in with `admin@nova.com` / `nova123`. To add a product, fill in its name, category, price, image URL, and description, then select **Save product**. Use **Edit** or **Delete** on a catalog item to update or remove it. Changes are stored in `data/products.json`.
+1. Create a Supabase project, then run `supabase/migrations/202610010001_products_and_storage.sql` in the Supabase SQL Editor. It creates the products/orders tables, admin allowlist, RLS policies, and the public-read/private-write `product-images` bucket.
+2. In Supabase Authentication, create the admin user `admin@nova.com` with a strong password and disable public sign-ups. The migration allowlists that email; change the allowlist row in the SQL before running it if you use a different admin email.
+3. In Project Settings → API, copy the Project URL and public anon key into `supabase-config.json` as `url` and `anonKey`. The anon key is designed to be public; RLS is the protection. Do not copy the service-role key there.
+4. Import the existing 33 products and 3 sample orders once. In a local PowerShell terminal, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then run `node scripts/migrate-products-to-supabase.js`. The importer skips existing IDs and never overwrites them. Keep the service-role key local; do not commit it or send it in chat.
+5. Commit/push `supabase-config.json` after adding the public URL and anon key so GitHub Pages can read the cloud catalog.
 
-All 8 existing NOVA products are already in `data/products.json`. The storefront now reads that same API, so catalog changes appear in the shop when viewed on this computer while the server is running. GitHub Pages alone cannot provide a shared API to visitors on other devices; that requires a hosted backend.
+Open `https://shari-q.github.io/nova-shoes/admin`, sign in with the Supabase Auth admin user, and manage products there. Choose an image file to upload it to Supabase Storage, or paste an existing image URL. The public shop reads products from Supabase on any device. The existing 33 image URLs remain external until you replace them; new uploads use the cloud bucket.
+
+The 3 existing orders are sample records only. The checkout flow is still a demo and does not create real orders or process payments.
 
 ## Sanity product catalog
 

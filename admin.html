@@ -755,10 +755,13 @@
           <div class="field">
             <label for="email">Admin email</label>
             <input id="email" name="email" type="email" value="admin@nova.com" required />
-          </div>
-          <div class="field">
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" value="nova123" required />
+              <div>
+                <label for="productImageFile">Product image upload</label>
+                <input id="productImageFile" name="imageFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif" />
+                <small>JPG, PNG, WebP, or AVIF. Maximum 5 MB.</small>
+                <label for="productImage">Or image URL</label>
+                <input id="productImage" name="img" type="url" placeholder="https://..." />
+              </div>
           </div>
           <button class="primary-btn" type="submit" style="width: 100%;">Login to dashboard</button>
         </form>
@@ -991,8 +994,11 @@
               </div>
 
               <div>
-                <label for="productImage">Image URL</label>
-                <input id="productImage" name="img" type="url" required />
+                <label for="productImageFile">Product image</label>
+                <input id="productImageFile" name="imageFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif" />
+                <small>Upload stores the image in the connected cloud bucket.</small>
+                <label for="productImage">Or image URL</label>
+                <input id="productImage" name="img" type="url" placeholder="https://..." />
               </div>
 
               <div class="row">
@@ -1044,10 +1050,186 @@
       const productForm = document.getElementById('productForm');
       const resetProductBtn = document.getElementById('resetProductBtn');
       const apiBaseUrl = (document.querySelector('meta[name="nova-api-base-url"]')?.content || '').trim().replace(/\/$/, '');
+      let supabaseConfigPromise;
       let editingProductId = null;
       let allProducts = [];
 
+      function getSupabaseConfig() {
+        supabaseConfigPromise ||= fetch(new URL('supabase-config.json', location.href))
+          .then((response) => response.ok ? response.json() : null)
+          .then((config) => config?.url && config?.anonKey
+            ? { ...config, url: config.url.replace(/\/+$/, ''), storageBucket: config.storageBucket || 'product-images' }
+            : null)
+          .catch(() => null);
+        return supabaseConfigPromise;
+      }
+
+      async function parseSupabaseResponse(response) {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.message || data.error_description || data.msg || `Supabase request failed (HTTP ${response.status})`);
+        }
+        return data;
+      }
+
+      function getStoredSupabaseSession() {
+        try {
+          return JSON.parse(localStorage.getItem(adminSessionKey) || 'null');
+        } catch {
+          return null;
+        }
+      }
+
+      async function getSupabaseAccessToken(config, required = false) {
+        let session = getStoredSupabaseSession();
+        if (!session?.accessToken) {
+          if (required) throw new Error('Please sign in with the configured NOVA admin account.');
+          return config.anonKey;
+        }
+
+        if (session.expiresAt && session.expiresAt < Date.now() + 30000) {
+          if (!session.refreshToken) throw new Error('Admin session expired. Please sign in again.');
+          const response = await fetch(`${config.url}/auth/v1/token?grant_type=refresh_token`, {
+            method: 'POST',
+            headers: { apikey: config.anonKey, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: session.refreshToken }),
+          });
+          const refreshed = await parseSupabaseResponse(response);
+          session = {
+            ...session,
+            accessToken: refreshed.access_token,
+            refreshToken: refreshed.refresh_token,
+            expiresAt: refreshed.expires_at ? refreshed.expires_at * 1000 : Date.now() + Number(refreshed.expires_in || 3600) * 1000,
+          };
+          localStorage.setItem(adminSessionKey, JSON.stringify(session));
+        }
+
+        return session.accessToken;
+      }
+
+      async function supabaseRest(config, path, method = 'GET', body, options = {}) {
+        const token = await getSupabaseAccessToken(config, options.admin === true);
+        const headers = {
+          apikey: config.anonKey,
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        };
+        if (body !== undefined && !(body instanceof FormData)) headers['Content-Type'] = 'application/json';
+        if (options.prefer) headers.Prefer = options.prefer;
+        const response = await fetch(`${config.url}/rest/v1/${path}`, {
+          method,
+          headers,
+          body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
+        });
+        return parseSupabaseResponse(response);
+      }
+
+      function toSupabaseProduct(product) {
+        return {
+          id: String(product.id || `nova-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`),
+          name: String(product.name || '').trim(),
+          slug: String(product.slug || product.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+          cat: String(product.cat || 'Lifestyle'),
+          price: Number(product.price || 0),
+          old: Number(product.old || product.price || 0),
+          img: String(product.img || ''),
+          tag: String(product.tag || 'NEW'),
+          rating: String(product.rating || '4.8'),
+          description: String(product.desc || ''),
+        };
+      }
+
+      function fromSupabaseProduct(product) {
+        return {
+          id: String(product.id),
+          name: String(product.name || ''),
+          slug: String(product.slug || ''),
+          cat: String(product.cat || 'Lifestyle'),
+          price: Number(product.price || 0),
+          old: Number(product.old ?? product.price ?? 0),
+          img: String(product.img || ''),
+          tag: String(product.tag || 'NEW'),
+          rating: String(product.rating || '4.8'),
+          desc: String(product.description || ''),
+        };
+      }
+
+      async function supabaseApiRequest(path, options = {}, config) {
+        const method = (options.method || 'GET').toUpperCase();
+        const requiresAdmin = method !== 'GET' || path !== '/api/products';
+
+        if (path === '/api/admin/uploads' && method === 'POST') {
+          const file = options.body?.get('image');
+          const extensions = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/avif': 'avif' };
+          if (!file || !extensions[file.type]) throw new Error('Choose a JPG, PNG, WebP, or AVIF image.');
+          if (file.size > 5 * 1024 * 1024) throw new Error('Image must be 5 MB or smaller.');
+
+          const objectPath = `products/${Date.now()}-${crypto.randomUUID()}.${extensions[file.type]}`;
+          const encodedPath = objectPath.split('/').map(encodeURIComponent).join('/');
+          const token = await getSupabaseAccessToken(config, true);
+          const response = await fetch(`${config.url}/storage/v1/object/${encodeURIComponent(config.storageBucket)}/${encodedPath}`, {
+            method: 'POST',
+            headers: { apikey: config.anonKey, Authorization: `Bearer ${token}`, 'Content-Type': file.type, 'x-upsert': 'false' },
+            body: file,
+          });
+          await parseSupabaseResponse(response);
+          return { url: `${config.url}/storage/v1/object/public/${encodeURIComponent(config.storageBucket)}/${encodedPath}` };
+        }
+
+        if (path === '/api/products' && method === 'GET') {
+          const rows = await supabaseRest(config, 'products?select=*&order=created_at.asc');
+          return rows.map(fromSupabaseProduct);
+        }
+
+        if (path === '/api/products' && method === 'POST') {
+          const product = toSupabaseProduct(JSON.parse(options.body || '{}'));
+          if (!product.name || !product.slug || !product.cat || !product.price || !product.img) {
+            throw new Error('Name, category, price, and product image are required.');
+          }
+          const rows = await supabaseRest(config, 'products?select=*', 'POST', product, { admin: true, prefer: 'return=representation' });
+          return fromSupabaseProduct(rows[0]);
+        }
+
+        const productMatch = path.match(/^\/api\/products\/([^/]+)$/);
+        if (productMatch && method === 'PUT') {
+          const product = toSupabaseProduct(JSON.parse(options.body || '{}'));
+          const id = encodeURIComponent(decodeURIComponent(productMatch[1]));
+          const rows = await supabaseRest(config, `products?id=eq.${id}&select=*`, 'PATCH', product, { admin: true, prefer: 'return=representation' });
+          if (!rows.length) throw new Error('Product not found.');
+          return fromSupabaseProduct(rows[0]);
+        }
+
+        if (productMatch && method === 'DELETE') {
+          const id = encodeURIComponent(decodeURIComponent(productMatch[1]));
+          const rows = await supabaseRest(config, `products?id=eq.${id}&select=id`, 'DELETE', undefined, { admin: true, prefer: 'return=representation' });
+          if (!rows.length) throw new Error('Product not found.');
+          return { success: true, id: decodeURIComponent(productMatch[1]) };
+        }
+
+        if (path === '/api/orders' && method === 'GET') {
+          return supabaseRest(config, 'orders?select=*&order=date.desc', 'GET', undefined, { admin: true });
+        }
+
+        if (path === '/api/admin/stats' && method === 'GET') {
+          const [products, orders] = await Promise.all([
+            supabaseRest(config, 'products?select=cat', 'GET', undefined, { admin: true }),
+            supabaseRest(config, 'orders?select=total', 'GET', undefined, { admin: true }),
+          ]);
+          return {
+            products: products.length,
+            orders: orders.length,
+            revenue: orders.reduce((sum, order) => sum + Number(order.total || 0), 0),
+            activeCategories: [...new Set(products.map((product) => product.cat))].length,
+          };
+        }
+
+        throw new Error(`Unsupported Supabase request: ${method} ${path}`);
+      }
+
       async function apiRequest(path, options) {
+        const config = await getSupabaseConfig();
+        if (config) return supabaseApiRequest(path, options, config);
+
         let response;
         try {
           response = await fetch(`${apiBaseUrl}${path}`, options);
@@ -1097,13 +1279,45 @@
         const password = document.getElementById('password').value.trim();
 
         try {
-          const data = await apiRequest('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-          });
+          const config = await getSupabaseConfig();
+          let adminSession;
 
-          localStorage.setItem(adminSessionKey, JSON.stringify({ email: data.user.email, role: 'admin' }));
+          if (config) {
+            const response = await fetch(`${config.url}/auth/v1/token?grant_type=password`, {
+              method: 'POST',
+              headers: { apikey: config.anonKey, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password }),
+            });
+            const auth = await parseSupabaseResponse(response);
+            const adminCheck = await fetch(`${config.url}/rest/v1/rpc/is_nova_admin`, {
+              method: 'POST',
+              headers: {
+                apikey: config.anonKey,
+                Authorization: `Bearer ${auth.access_token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({}),
+            });
+            if (!await parseSupabaseResponse(adminCheck)) {
+              throw new Error('This account is not listed as a NOVA admin.');
+            }
+            adminSession = {
+              email: auth.user.email,
+              role: 'admin',
+              accessToken: auth.access_token,
+              refreshToken: auth.refresh_token,
+              expiresAt: auth.expires_at ? auth.expires_at * 1000 : Date.now() + Number(auth.expires_in || 3600) * 1000,
+            };
+          } else {
+            const data = await apiRequest('/api/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password })
+            });
+            adminSession = { email: data.user.email, role: 'admin' };
+          }
+
+          localStorage.setItem(adminSessionKey, JSON.stringify(adminSession));
           setAlert(loginAlert, '', 'error');
           showDashboard();
           await loadDashboard();
@@ -1196,6 +1410,7 @@
       async function handleProductSubmit(event) {
         event.preventDefault();
 
+        const imageFile = document.getElementById('productImageFile').files[0];
         const payload = {
           name: document.getElementById('productName').value.trim(),
           cat: document.getElementById('productCategory').value,
@@ -1207,12 +1422,22 @@
           desc: document.getElementById('productDesc').value.trim(),
         };
 
-        if (!payload.name || !payload.img || !payload.price) {
+        if (!payload.name || (!payload.img && !imageFile) || !payload.price) {
           window.alert('Product name, image, and price are required.');
           return;
         }
 
         try {
+          if (imageFile) {
+            const config = await getSupabaseConfig();
+            if (!config) throw new Error('Connect Supabase before uploading an image, or paste an image URL.');
+            const uploadForm = new FormData();
+            uploadForm.append('image', imageFile);
+            const uploaded = await apiRequest('/api/admin/uploads', { method: 'POST', body: uploadForm });
+            payload.img = uploaded.url;
+            document.getElementById('productImage').value = uploaded.url;
+          }
+
           const url = editingProductId ? `/api/products/${editingProductId}` : '/api/products';
           const method = editingProductId ? 'PUT' : 'POST';
           await apiRequest(url, {
@@ -1288,12 +1513,29 @@
       productForm.addEventListener('submit', handleProductSubmit);
       loginForm.addEventListener('submit', loginAdmin);
 
-      if (isLoggedIn()) {
-        showDashboard();
-        loadDashboard();
-      } else {
-        showLogin();
+      async function initializeAdmin() {
+        const config = await getSupabaseConfig();
+        if (config) {
+          try {
+            await getSupabaseAccessToken(config, true);
+            showDashboard();
+            await loadDashboard();
+          } catch (error) {
+            localStorage.removeItem(adminSessionKey);
+            showLogin();
+          }
+          return;
+        }
+
+        if (isLoggedIn()) {
+          showDashboard();
+          await loadDashboard();
+        } else {
+          showLogin();
+        }
       }
+
+      initializeAdmin();
     </script>
   </body>
 </html>

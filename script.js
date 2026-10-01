@@ -347,6 +347,8 @@ let couponApplied = false;
 const NOVA_CONTACT_EMAIL = "shariq.mailbox1@gmail.com";
 const NOVA_CONTACT_PHONE = "+92 320 8131452";
 const NOVA_API_BASE_URL = "http://localhost:3002";
+const NOVA_SUPABASE_CONFIG_URL = new URL("supabase-config.json", document.currentScript?.src || location.href);
+let novaSupabasePublicConfigPromise;
 const NOVA_SANITY = {
   projectId: "qdlqona2",
   dataset: "production",
@@ -401,6 +403,48 @@ async function loadBackendProducts() {
     return true;
   } catch (error) {
     console.warn('Backend catalog unavailable; trying Sanity next.', error);
+    return false;
+  }
+}
+
+async function loadSupabaseProducts() {
+  try {
+    novaSupabasePublicConfigPromise ||= fetch(NOVA_SUPABASE_CONFIG_URL)
+      .then((response) => response.ok ? response.json() : null)
+      .catch(() => null);
+    const config = await novaSupabasePublicConfigPromise;
+    if (!config?.url || !config?.anonKey) return false;
+
+    const endpoint = new URL('/rest/v1/products?select=*&order=created_at.asc', config.url);
+    const response = await fetch(endpoint, {
+      headers: {
+        apikey: config.anonKey,
+        Authorization: `Bearer ${config.anonKey}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
+
+    const rows = await response.json();
+    if (!Array.isArray(rows) || !rows.length) return false;
+
+    products = rows.map((product, index) => ({
+      id: String(product.id || `supabase-${index + 1}`),
+      name: String(product.name || `Product ${index + 1}`),
+      slug: String(product.slug || product.name || `supabase-${index + 1}`),
+      cat: String(product.cat || 'Lifestyle'),
+      price: Number(product.price || 0),
+      old: Number(product.old ?? product.price ?? 0),
+      img: safeProductImage(product.img),
+      tag: String(product.tag || 'NEW'),
+      rating: String(product.rating || '4.8'),
+      desc: String(product.description || ''),
+    }));
+
+    refreshProductSurfaces();
+    return true;
+  } catch (error) {
+    console.warn('Supabase catalog unavailable; trying the local API next.', error);
     return false;
   }
 }
@@ -1467,8 +1511,11 @@ function init() {
     initAuthPage();
   if (document.body.classList.contains("product-body")) initProductPage();
   if (document.body.classList.contains("checkout-body")) initCheckout();
-  loadBackendProducts().then((loaded) => {
-    if (!loaded) loadSanityProducts();
+  loadSupabaseProducts().then((loaded) => {
+    if (loaded) return;
+    loadBackendProducts().then((backendLoaded) => {
+      if (!backendLoaded) loadSanityProducts();
+    });
   });
   document.querySelectorAll(".tilt").forEach((el) => {
     el.addEventListener("mousemove", (e) => {
