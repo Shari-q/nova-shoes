@@ -3,12 +3,12 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, 'data');
 const productsFile = path.join(dataDir, 'products.json');
 const ordersFile = path.join(dataDir, 'orders.json');
-const allowedOrigins = (process.env.NOVA_ALLOWED_ORIGINS || 'https://shari-g.github.io,http://localhost:3000,http://127.0.0.1:3000')
+const allowedOrigins = (process.env.NOVA_ALLOWED_ORIGINS || 'https://shari-q.github.io,http://localhost:3000,http://127.0.0.1:3000')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
