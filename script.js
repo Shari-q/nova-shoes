@@ -346,6 +346,7 @@ let currentQty = 1;
 let couponApplied = false;
 const NOVA_CONTACT_EMAIL = "shariq.mailbox1@gmail.com";
 const NOVA_CONTACT_PHONE = "+92 320 8131452";
+const NOVA_API_BASE_URL = "http://localhost:3002";
 const NOVA_SANITY = {
   projectId: "qdlqona2",
   dataset: "production",
@@ -378,7 +379,7 @@ function productUrl(product, index) {
 
 async function loadBackendProducts() {
   try {
-    const response = await fetch('/api/products');
+    const response = await fetch(`${NOVA_API_BASE_URL}/api/products`);
     if (!response.ok) throw new Error(`Backend returned ${response.status}`);
     const remoteProducts = await response.json();
     if (!Array.isArray(remoteProducts) || !remoteProducts.length) return false;

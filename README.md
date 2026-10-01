@@ -120,15 +120,13 @@ Then open:
 http://localhost:8000
 ```
 
-## Admin backend deployment
+## Local Admin and Catalog
 
-GitHub Pages serves static files only; it cannot run `server.js` or provide `/api/login`. Manage the catalog with the existing Sanity Studio instead:
+GitHub Pages serves the storefront and admin UI, while the API runs on your computer. From the project root, run `npm start` and keep the terminal open. The server listens at `http://localhost:3002`.
 
-1. Run the Studio locally with `cd sanity-studio`, `npm install`, and `npm run dev`, then sign in with an account that has access to the Sanity project.
-2. Publish the Studio with `npm run deploy`; its configured host is `nova-shoes-admin.sanity.studio`.
-3. Import the initial products into the Sanity `production` dataset using the documented import script and a write token kept out of the repository.
+Open `https://shari-q.github.io/nova-shoes/admin` on the same computer and sign in with `admin@nova.com` / `nova123`. To add a product, fill in its name, category, price, image URL, and description, then select **Save product**. Use **Edit** or **Delete** on a catalog item to update or remove it. Changes are stored in `data/products.json`.
 
-The custom Express dashboard is available only when `server.js` is running. GitHub Pages cannot host that API; the Sanity Studio is the hosted catalog manager.
+All 8 existing NOVA products are already in `data/products.json`. The storefront now reads that same API, so catalog changes appear in the shop when viewed on this computer while the server is running. GitHub Pages alone cannot provide a shared API to visitors on other devices; that requires a hosted backend.
 
 ## Sanity product catalog
 
