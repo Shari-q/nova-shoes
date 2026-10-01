@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NOVA Admin Dashboard</title>
     <meta name="nova-api-base-url" content="http://localhost:3002" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
       :root {
         --bg: #f4f7fb;
@@ -718,6 +721,27 @@
         .main-panel { padding-top: 12px; }
         .topbar, .hero-row { display: grid; }
       }
+
+      :root {
+        --bg: #f4f6f8;
+        --surface-soft: #f8f9fb;
+        --line: #e3e7eb;
+        --text: #26323f;
+        --muted: #5b6777;
+        --primary: #0177cd;
+        --primary-dark: #0068b8;
+        --primary-soft: rgba(1, 119, 205, 0.1);
+        --shadow: 0 8px 24px rgba(26, 44, 64, 0.06);
+      }
+
+      body { font-family: Inter, "Segoe UI", sans-serif; }
+      .stat-card, .status-box, .panel, .mini-card, .table-panel,
+      .catalog-item, .login-card { border-radius: 6px; }
+      .primary-btn, .ghost-btn, .mini-btn, .danger-btn,
+      .product-form input, .product-form select, .product-form textarea,
+      .field input { border-radius: 5px; }
+      .sidebar { background: linear-gradient(180deg, #123f67 0%, #0d3153 100%); }
+      .login-shell { background: #f4f6f8; }
     </style>
   </head>
   <body>
