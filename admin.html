@@ -760,6 +760,7 @@
       .admin-page-view { display: none; }
       .admin-page-view.active { display: block; }
       .admin-page-header { margin: 0 0 18px; }
+      .admin-page-header.with-action { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
       .admin-page-header h1 { margin: 0 0 4px; font-size: 1.55rem; }
       .admin-page-header p { margin: 0; color: var(--muted); }
       .admin-page-content { min-height: 240px; }
@@ -961,24 +962,11 @@
         </section>
 
         <section class="admin-page-view" data-admin-page="orders">
-        <section class="table-panel" id="ordersSection">
-          <div class="panel-header">
-            <h3>Recent Orders</h3>
+          <header class="admin-page-header with-action">
+            <div><h1>Orders</h1><p>Orders recorded in the connected backend.</p></div>
             <button class="primary-btn" id="refreshBtn" type="button">Refresh</button>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>State</th>
-                <th>Total</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody id="ordersTableBody"></tbody>
-          </table>
-        </section>
+          </header>
+          <div class="admin-page-content" id="ordersPageContent"></div>
         </section>
 
         <section class="admin-page-view" data-admin-page="products">
@@ -1762,22 +1750,6 @@
           document.getElementById('packingCount').textContent = '0';
           document.getElementById('deliveredCount').textContent = '0';
 
-          ordersTableBody.innerHTML = orders.slice(0, 4).map((order) => {
-            const status = (order.status || 'Processing').toLowerCase();
-            let statusClass = 'pending';
-            if (status === 'paid' || status === 'confirmed') statusClass = 'status-pill';
-            if (status === 'cancelled') statusClass = 'status-pill cancelled';
-            return `
-              <tr>
-                <td>${order.id}</td>
-                <td>${order.customer}</td>
-                <td><span class="status-pill ${statusClass === 'status-pill' ? '' : statusClass}">${order.status}</span></td>
-                <td>Rs ${Number(order.total || 0).toLocaleString('en-PK')}</td>
-                <td>${order.date}</td>
-              </tr>
-            `;
-          }).join('');
-
           allOrders = orders;
           allProducts = products;
           document.getElementById('productsStat').textContent = allProducts.length;
@@ -1799,7 +1771,7 @@
       });
 
       viewOrdersBtn.addEventListener('click', () => {
-        document.getElementById('ordersTableBody').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showAdminPage('orders');
       });
 
       refreshBtn.addEventListener('click', loadDashboard);
