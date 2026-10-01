@@ -122,13 +122,13 @@ http://localhost:8000
 
 ## Admin backend deployment
 
-GitHub Pages serves static files only; it cannot run `server.js` or provide `/api/login`. Deploy the repository as a Render web service using the included `render.yaml`:
+GitHub Pages serves static files only; it cannot run `server.js` or provide `/api/login`. Manage the catalog with the existing Sanity Studio instead:
 
-1. Push the repository, including `render.yaml`, to GitHub.
-2. In Render, create a Blueprint from the `Shari-q/nova-shoes` repository and apply the `nova-shoes` service. Enter the admin email and a strong password when prompted.
-3. Open the deployed service URL followed by `/admin` (for example, `https://your-service.onrender.com/admin`). The page and API share the same host, so no API URL setting is needed.
+1. Run the Studio locally with `cd sanity-studio`, `npm install`, and `npm run dev`, then sign in with an account that has access to the Sanity project.
+2. Publish the Studio with `npm run deploy`; its configured host is `nova-shoes-admin.sanity.studio`.
+3. Import the initial products into the Sanity `production` dataset using the documented import script and a write token kept out of the repository.
 
-Do not use the GitHub Pages `/admin` URL for login; it will continue to show the backend-not-connected message because that host does not run Node.js. The free Render service may sleep when idle, and its filesystem is not persistent, so JSON catalog/order edits are not suitable for a live store without persistent storage or a database.
+The custom Express dashboard is available only when `server.js` is running. GitHub Pages cannot host that API; the Sanity Studio is the hosted catalog manager.
 
 ## Sanity product catalog
 
