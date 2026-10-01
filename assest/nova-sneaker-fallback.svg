@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#16050b"/><stop offset=".55" stop-color="#5d182b"/><stop offset="1" stop-color="#d7b29b"/></linearGradient>
+ <linearGradient id="shoe" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffdf9"/><stop offset=".58" stop-color="#e7ddd4"/><stop offset="1" stop-color="#bcae9f"/></linearGradient>
+ <linearGradient id="sole" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#30282a"/><stop offset="1" stop-color="#090708"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="35" stdDeviation="25" flood-color="#000" flood-opacity=".45"/></filter>
+</defs>
+<rect width="1200" height="900" fill="url(#bg)"/>
+<circle cx="900" cy="240" r="250" fill="#f4d7c2" opacity=".12"/>
+<path d="M145 650 C315 625 430 590 560 480 L715 315 C760 270 823 273 865 325 L1012 505 C1040 540 1084 556 1125 568 L1125 660 L960 690 L610 735 L220 742 Z" fill="url(#shoe)" filter="url(#shadow)"/>
+<path d="M180 665 C360 655 520 628 685 585 C830 547 1015 558 1128 585 L1128 670 C940 716 675 753 420 760 L200 744 Z" fill="url(#sole)"/>
+<path d="M545 490 L760 342 L1000 542" fill="none" stroke="#b9a99e" stroke-width="18" stroke-linecap="round" opacity=".8"/>
+<path d="M605 474 L780 366 M585 510 L820 380 M575 548 L855 405" stroke="#6e5c57" stroke-width="12" stroke-linecap="round" opacity=".75"/>
+<path d="M330 650 C440 630 505 600 575 525" fill="none" stroke="#fff" stroke-width="20" opacity=".75"/>
+<text x="78" y="105" fill="#fff" opacity=".72" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="7">NOVA / PRIVATE EDIT</text>
+<text x="80" y="830" fill="#fff" opacity=".4" font-family="Arial,sans-serif" font-size="16" letter-spacing="5">PREMIUM FOOTWEAR • 2026</text>
+</svg>

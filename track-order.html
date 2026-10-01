@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>NOVA — Track Order</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@500;600;700&display=swap" rel="stylesheet"/><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/><link href="style.css" rel="stylesheet"/></head><body class="track-page"><main class="track-shell"><section class="track-hero"><div><span class="eyebrow">NOVA / ORDER CARE · 2026</span><h1>Track your<br/><em>movement.</em></h1><p>Enter your NOVA order number and email to check the latest status available for your order.</p></div><div class="track-visual premium-3d"><i class="bi bi-box-seam"></i><b>TRACK</b><span>ORDER / NOVA</span></div></section><section class="track-panel"><div class="track-form-card premium-3d"><span class="eyebrow">01 · ORDER LOOKUP</span><h2>Where is<br/><em>your pair?</em></h2><form id="trackOrderForm"><label>Order Number<input id="trackOrderId" placeholder="NOVA-2026-XXXX" required/></label><label>Email<input id="trackOrderEmail" type="email" placeholder="you@example.com" required/></label><button class="primary-btn" type="submit">Track Order <i class="bi bi-arrow-right"></i></button><p class="track-status" id="trackStatus" role="status"></p></form></div><div class="track-result premium-3d" id="trackResult"><span class="eyebrow">02 · LIVE STATUS</span><div class="track-empty"><i class="bi bi-truck"></i><h3>Enter your details</h3><p>Your latest NOVA order will appear here when the order number and email match the saved order on this device.</p></div></div></section><section class="track-help"><span class="eyebrow">NOVA / CUSTOMER CARE</span><h2>Can’t find your order?</h2><p>Contact us with your order number and we’ll help you with the next step.</p><a class="primary-btn" href="contact.html">Contact NOVA <i class="bi bi-arrow-up-right"></i></a></section></main><footer id="contact">
+<div class="container footer-main">
+<div class="footer-brand">
+<a aria-label="NOVA home" class="footer-logo" href="index.html#home"><img alt="NOVA logo" src="assest/Nova-Logo-Clean.png"/></a>
+<p>
+              More than shoes. It's a lifestyle built around movement, comfort
+              and considered design.
+            </p>
+<div class="socials">
+<a href="#"><i class="bi bi-instagram"></i></a><a href="#"><i class="bi bi-facebook"></i></a><a href="#"><i class="bi bi-twitter-x"></i></a><a href="#"><i class="bi bi-youtube"></i></a><a href="#"><i class="bi bi-pinterest"></i></a>
+</div>
+</div>
+<div>
+<h6>Shop</h6>
+<a href="index.html#shop">All Products</a><a href="index.html#shop">New Arrivals</a><a href="index.html#shop">Best Sellers</a><a href="index.html#shop">Limited Edition</a><a href="index.html#shop">Sale</a>
+</div>
+<div>
+<h6>Categories</h6>
+<a href="index.html#categories">Men</a><a href="index.html#categories">Women</a><a href="index.html#categories">Running</a><a href="index.html#categories">Basketball</a><a href="index.html#categories">Lifestyle</a>
+</div>
+<div>
+<h6>About NOVA</h6>
+<a href="about.html">Our Story</a><a href="about.html#standard">The NOVA Standard</a><a href="index.html#journal">Journal</a><a href="about.html#careers">Careers</a><a href="contact.html">Contact Us</a>
+</div>
+<div>
+<h6>Customer Care</h6>
+<a href="return-policy.html">Shipping & Returns</a><a href="return-policy.html">Returns &amp; Refunds</a><a href="faq.html#faq-list">Size Guide</a><a href="faq.html#faq-list">Care Guide</a><a href="faq.html#faq-list">FAQ</a>
+<a href="refund-policy.html">Refund Policy</a><a href="return-policy.html">Return Policy</a><a href="cancelation-policy.html">Cancellation Policy</a></div>
+<div>
+<h6>Get in Touch</h6>
+<a href="mailto:shariq.mailbox1@gmail.com">shariq.mailbox1@gmail.com</a><a href="tel:+923208131452">+92 320 8131452</a>
+<p class="footer-note">Mon–Sat · 10:00–18:00 PKT</p>
+<div aria-label="Accepted payment methods" class="payments">
+<img alt="Visa" src="assest/payment-visa.png"/><img alt="PayPak" src="assest/payment-paypak.png"/><img alt="JazzCash" src="assest/payment-jazzcash.png"/><img alt="EasyPaisa" src="assest/payment-easypaisa.png"/>
+</div>
+</div>
+</div>
+<div class="footer-showcase container">
+<div>
+<span class="eyebrow">NOVA / PRIVATE EDIT</span>
+<h3>Stay close to<br/><em>the next drop.</em></h3>
+</div>
+<div class="footer-showcase-copy">
+<p>
+              Sign up for launch notes, new colourways, limited releases and
+              styling stories — curated, not crowded.
+            </p>
+<a class="footer-cta" href="index.html#newsletter">Join the NOVA Club <i class="bi bi-arrow-up-right"></i></a>
+</div>
+<div class="footer-mark">N</div>
+</div>
+<div class="footer-bottom container">
+<span>COPYRIGHT 2026 | ALL RIGHTS RESERVED | POWERED BY <a href="https://shari-q.github.io/Portfolio/" target="_blank" rel="noreferrer">SHARIQ</a></span>
+</div>
+</footer><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script src="script.js"></script><script>document.addEventListener('DOMContentLoaded',()=>{const f=document.getElementById('trackOrderForm'),r=document.getElementById('trackResult'),s=document.getElementById('trackStatus');f?.addEventListener('submit',e=>{e.preventDefault();const id=document.getElementById('trackOrderId').value.trim().toUpperCase(),email=document.getElementById('trackOrderEmail').value.trim().toLowerCase();let order=null;try{order=JSON.parse(localStorage.getItem('novaLastOrder')||'null')}catch(_ ){};if(order && order.orderId===id && String(order.email||'').toLowerCase()===email){r.innerHTML=`<span class="eyebrow">02 · ORDER STATUS</span><div class="track-found"><div class="track-found-head"><div><small>ORDER</small><b>${order.orderId}</b></div><strong>Confirmed</strong></div><div class="track-steps"><div class="done"><i class="bi bi-check2"></i><span>Order placed</span></div><div class="done"><i class="bi bi-check2"></i><span>Payment / review</span></div><div class="current"><i class="bi bi-truck"></i><span>Preparing for dispatch</span></div><div><i class="bi bi-house"></i><span>Delivered</span></div></div><div class="track-order-meta"><span><small>Customer</small><b>${order.customerName||'NOVA customer'}</b></span><span><small>Total</small><b>${typeof money==='function'?money(order.total):'Rs '+Number(order.total||0).toLocaleString()}</b></span></div></div>`;s.textContent='Order found — showing the latest saved status.';s.className='track-status success'}else{s.textContent='We could not match that order number and email on this device. If you placed the order on another device, contact NOVA customer care.';s.className='track-status error';r.innerHTML=`<span class="eyebrow">02 · LIVE STATUS</span><div class="track-empty"><i class="bi bi-search"></i><h3>No matching order</h3><p>Check your order number and email, or contact NOVA for help.</p></div>`}})});</script></body></html>

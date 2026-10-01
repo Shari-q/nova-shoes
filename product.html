@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>NOVA — Product</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Cormorant+Garamond:ital,wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+</head>
+<body class="inner-page product-body">
+<header class="inner-shop-header">
+<a class="inner-brand-dark" href="index.html"><img alt="NOVA" src="assest/Nova-Logo-Clean.png"/></a>
+<nav>
+<a href="index.html#shop">Shop</a><a href="index.html#categories">Categories</a><a href="index.html#story">Our Story</a>
+</nav>
+<div>
+<a class="inner-icon" href="auth.html?mode=signin"><i class="bi bi-person"></i></a><a class="inner-icon" href="cart.html"><i class="bi bi-bag"></i><b id="productBagCount">0</b></a>
+</div>
+</header>
+<main class="product-page-main">
+<div class="product-breadcrumb">
+<a href="index.html">Home</a><i class="bi bi-chevron-right"></i><span>Product</span>
+</div>
+<section class="product-detail-page">
+<div class="product-gallery-page premium-3d">
+<div class="product-main-image" id="productMainImage"></div>
+<div class="product-gallery-caption">
+<span>EDITORIAL PRODUCT VIEW</span><span id="productTag">LIMITED EDITION</span>
+</div>
+</div>
+<div class="product-info-page premium-info-card premium-3d">
+<div class="eyebrow" id="productCategory">NOVA / COLLECTION</div>
+<h1 id="productName">Nova High 01</h1>
+<div class="product-rating-page">
+<span>★★★★★</span><b id="productRating">4.9</b><small> 128 reviews</small>
+</div>
+<div class="product-price-page">
+<strong id="productPrice">Rs 15,990</strong><del id="productOld">Rs 19,990</del><span id="productDiscount">-20%</span>
+</div>
+<p class="product-lead" id="productDescription">
+            A signature NOVA silhouette designed around premium texture,
+            balanced proportions and everyday movement. Finished with a sculpted
+            profile and a soft, comfortable interior.
+          </p>
+<div class="product-meta-grid">
+<div>
+<i class="bi bi-gem"></i><span><b>Premium finish</b><small>Refined materials</small></span>
+</div>
+<div>
+<i class="bi bi-wind"></i><span><b>Lightweight feel</b><small>Made to move</small></span>
+</div>
+<div>
+<i class="bi bi-shield-check"></i><span><b>Quality checked</b><small>Before dispatch</small></span>
+</div>
+<div>
+<i class="bi bi-arrow-repeat"></i><span><b>30-day returns</b><small>Easy exchanges</small></span>
+</div>
+</div>
+<div class="size-heading">
+<span>Choose size</span><a href="#size-guide">Size guide</a>
+</div>
+<div class="size-select-page" id="sizeOptions">
+<button>40</button><button>41</button><button class="selected">42</button><button>43</button><button>44</button><button>45</button>
+</div>
+<div class="product-buy-row">
+<div class="qty">
+<button onclick="changeQty(-1)">−</button><span id="qtyValue">1</span><button onclick="changeQty(1)">+</button>
+</div>
+<button class="product-add-btn" onclick="addCurrentProduct()">
+              Add to Cart <i class="bi bi-bag-plus"></i>
+</button>
+</div>
+<button class="buy-now-btn" onclick="buyCurrentProduct()">
+            Buy Now <i class="bi bi-arrow-right"></i>
+</button>
+<div class="product-delivery">
+<div>
+<i class="bi bi-truck"></i><span><b>Free delivery</b><small>On orders over Rs 999</small></span>
+</div>
+<div>
+<i class="bi bi-box-seam"></i><span><b>Ships in 24–48 hours</b><small>Across Pakistan</small></span>
+</div>
+</div>
+</div>
+</section>
+<section class="product-story-strip premium-3d">
+<div>
+<span class="eyebrow">THE NOVA DETAIL</span>
+<h2>More than a sneaker.<br/><em>A considered object.</em></h2>
+</div>
+<p>
+          Every NOVA pair is built around a simple balance: a strong silhouette,
+          comfortable construction and details that reveal themselves up close.
+        </p>
+</section>
+<section class="size-guide-section" id="size-guide">
+<div>
+<span class="eyebrow">SIZE GUIDE</span>
+<h2>Find your<br/><em>right fit.</em></h2>
+</div>
+<div class="size-guide-table">
+<div>
+<b>EU</b><b>40</b><b>41</b><b>42</b><b>43</b><b>44</b><b>45</b>
+</div>
+<div>
+<span>Foot length</span><span>25.5</span><span>26.2</span><span>26.8</span><span>27.5</span><span>28.2</span><span>28.8</span>
+</div>
+</div>
+</section>
+</main>
+<script src="script.js"></script>
+</body>
+</html>

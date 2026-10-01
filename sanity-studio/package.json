@@ -1,0 +1,18 @@
+{
+  "name": "nova-sanity-studio",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "import-products": "node scripts/import-products.mjs"
+  },
+  "dependencies": {
+    "@sanity/client": "^7.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sanity": "^4.0.0",
+    "styled-components": "^6.5.3"
+  }
+}

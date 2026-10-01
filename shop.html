@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>NOVA — Shop</title>
+<link href="https://images.unsplash.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Cormorant+Garamond:ital,wght@500;600;700&amp;family=Playfair+Display:ital,wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/><link href="style.css" rel="stylesheet"/>
+</head>
+<body class="shop-page inner-page">
+<main>
+<section class="shop-page-hero">
+<div class="shop-page-copy"><span class="eyebrow">NOVA / SHOP · 2026</span><h1>Find your<br/><em>next pair.</em></h1><p>A curated NOVA edit across lifestyle, performance, basketball and limited releases. Designed to look sharp. Built to move.</p><div class="shop-page-actions"><a class="primary-btn" href="#productGrid">Explore all pairs <i class="bi bi-arrow-down"></i></a><a class="text-link" href="categories.html">Browse categories <i class="bi bi-arrow-up-right"></i></a></div></div>
+<div class="shop-hero-visual premium-3d"><div class="shop-hero-orbit"></div><div class="shop-hero-glow"></div><div class="shop-hero-photo"><img alt="Premium NOVA lifestyle sneaker" decoding="async" fetchpriority="low" loading="lazy" onerror="this.onerror=null;this.src='assest/nova-sneaker-fallback.svg';" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=84"/></div><div class="shop-floating-label"><span>CURATED EDIT</span><b>01 / 26</b><small>NEW SEASON</small></div></div>
+</section>
+<section class="shop-toolbar-section" id="new">
+<div class="shop-toolbar-head"><div><span class="eyebrow">THE COLLECTION</span><h2>Shop the <em>edit.</em></h2></div><p>Use the filters to move between NOVA worlds.</p></div>
+<div class="shop-filter-row" role="tablist"><button class="shop-filter active" onclick="filterCategory('All',this)">All</button><button class="shop-filter" onclick="filterCategory('Men',this)">Men</button><button class="shop-filter" onclick="filterCategory('Women',this)">Women</button><button class="shop-filter" onclick="filterCategory('Running',this)">Running</button><button class="shop-filter" onclick="filterCategory('Basketball',this)">Basketball</button><button class="shop-filter" onclick="filterCategory('Lifestyle',this)">Lifestyle</button></div>
+<div class="premium-product-grid" id="productGrid"></div>
+</section>
+<section class="shop-editorial-band" id="best"><div class="shop-editorial-image"><img alt="Urban sneaker editorial" decoding="async" fetchpriority="low" loading="lazy" onerror="this.onerror=null;this.src='assest/nova-sneaker-fallback.svg';" src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=1200&q=84"/></div><div class="shop-editorial-copy"><span class="eyebrow">02 / THE NOVA ATTITUDE</span><h2>Everyday pairs.<br/><em>Editorial energy.</em></h2><p>NOVA sits between performance and fashion — with proportions, materials and colourways designed to work beyond the product page.</p><a class="primary-btn" href="about.html">Discover our story <i class="bi bi-arrow-up-right"></i></a></div></section>
+<section class="shop-marquee" id="limited"><span>PRIVATE EDIT</span><b>LIMITED RELEASES</b><span>PREMIUM MATERIALS</span><b>DESIGNED IN MOTION</b></section>
+</main>
+<script src="script.js"></script>
+<script>
+function filterCategory(cat, btn){
+  document.querySelectorAll('.shop-filter').forEach(b=>b.classList.remove('active'));
+  btn?.classList.add('active');
+  const list = cat === 'All' ? products : products.filter(p=>p.cat===cat);
+  render(list);
+  document.getElementById('productGrid')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const cat=new URLSearchParams(location.search).get('cat');
+  if(cat && typeof products!=='undefined'){
+    const btn=[...document.querySelectorAll('.shop-filter')].find(b=>b.textContent.trim().toLowerCase()===cat.toLowerCase());
+    if(btn) filterCategory(cat,btn);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>NOVA — Your Cart</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Cormorant+Garamond:ital,wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+</head>
+<body class="inner-page cart-body">
+<header class="inner-shop-header">
+<a class="inner-brand-dark" href="index.html"><img alt="NOVA" src="assest/Nova-Logo-Clean.png"/></a>
+<button aria-expanded="false" aria-label="Open menu" class="inner-menu-toggle" onclick="toggleInnerNav(this)" type="button">
+<i class="bi bi-list"></i>
+</button>
+<nav class="inner-nav" id="innerNav">
+<a href="index.html#shop">Shop</a><a href="index.html#categories">Categories</a><a href="index.html#story">Our Story</a><a href="faq.html">FAQ</a>
+</nav>
+<div class="inner-actions">
+<a aria-label="Login" class="inner-icon" href="auth.html?mode=signin"><i class="bi bi-person"></i></a><a aria-label="Cart" class="inner-icon" href="cart.html"><i class="bi bi-bag"></i><b id="cartPageCount">0</b></a>
+</div>
+</header>
+<main class="cart-page-main">
+<div class="product-breadcrumb">
+<a href="index.html">Home</a><i class="bi bi-chevron-right"></i><span>Cart</span>
+</div>
+<div class="cart-page-heading">
+<div>
+<span class="eyebrow">NOVA / SHOPPING BAG</span>
+<h1>Your <em>Cart.</em></h1>
+<p>Review your selected pairs before moving to secure checkout.</p>
+</div>
+<a class="text-link dark" href="index.html#shop">Continue Shopping <i class="bi bi-arrow-right"></i></a>
+</div>
+<section class="cart-layout">
+<div class="cart-list-panel">
+<div class="cart-list-head"><b>PRODUCT</b><span>PRICE</span></div>
+<div id="fullCartItems"></div>
+</div>
+<aside class="cart-summary-panel">
+<span class="eyebrow">ORDER SUMMARY</span>
+<h2>Ready when<br/><em>you are.</em></h2>
+<div class="cart-summary-line">
+<span>Subtotal</span><b id="cartSubtotal">Rs 0</b>
+</div>
+<div class="cart-summary-line"><span>Shipping</span><b>FREE</b></div>
+<div class="cart-summary-line total">
+<span>Total</span><b id="cartTotal">Rs 0</b>
+</div>
+<a class="place-order-page" href="checkout.html">Proceed to Checkout <i class="bi bi-arrow-right"></i></a>
+<div class="cart-trust">
+<span><i class="bi bi-shield-check"></i> Secure checkout</span><span><i class="bi bi-truck"></i> Fast delivery</span><span><i class="bi bi-arrow-repeat"></i> 30-day returns</span>
+</div>
+</aside>
+</section>
+</main>
+<script src="script.js"></script>
+<script>
+      document.addEventListener("DOMContentLoaded", () => {
+        loadBag();
+        const wrap = document.getElementById("fullCartItems");
+        const count = document.getElementById("cartPageCount");
+        const sub = document.getElementById("cartSubtotal");
+        const total = document.getElementById("cartTotal");
+        const moneyLocal = (n) => "Rs " + Number(n).toLocaleString("en-PK");
+        function draw() {
+          if (count) count.textContent = bag.length;
+          if (!bag.length) {
+            wrap.innerHTML =
+              '<div class="cart-empty"><i class="bi bi-bag"></i><h3>Your cart is empty.</h3><p>Pick a pair from the NOVA collection to get started.</p><a class="primary-btn" href="index.html#shop">Shop Sneakers</a></div>';
+          } else {
+            wrap.innerHTML = bag
+              .map(
+                (p, i) =>
+                  `<div class="full-cart-item"><img src="${p.img}" alt="${p.name}"><div class="full-cart-info"><span>${p.cat} · NOVA EDIT</span><h3>${p.name}</h3><p>${p.desc}</p><strong>${moneyLocal(p.price)}</strong></div><button onclick="bag.splice(${i},1);saveBag();draw()"><i class="bi bi-trash3"></i></button></div>`,
+              )
+              .join("");
+          }
+          const s = bag.reduce((a, p) => a + p.price, 0);
+          if (sub) sub.textContent = moneyLocal(s);
+          if (total) total.textContent = moneyLocal(s);
+        }
+        window.drawCart = draw;
+        draw();
+      });
+    </script>
+</body>
+</html>

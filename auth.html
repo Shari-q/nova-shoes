@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>NOVA — Sign In / Sign Up</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Cormorant+Garamond:ital,wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+</head>
+<body class="inner-page auth-body">
+<div class="inner-top">
+<a class="back-home" href="index.html"><i class="bi bi-arrow-left"></i> Back to NOVA</a><a class="inner-brand" href="index.html"><img alt="NOVA" src="assest/Nova-Logo-Clean.png"/></a><span>Secure member access</span>
+</div>
+<main class="auth-full">
+<div class="auth-visual">
+<span class="eyebrow">NOVA PRIVATE ACCESS · 2026</span>
+<h1>Enter the<br/><em>NOVA world.</em></h1>
+<p>
+          Sign in for saved favourites, faster checkout, private drops and a
+          more personal shopping experience.
+        </p>
+<div class="auth-visual-pills">
+<span><i class="bi bi-shield-check"></i> Secure access</span><span><i class="bi bi-stars"></i> Private edits</span><span><i class="bi bi-bag-check"></i> Faster checkout</span>
+</div>
+</div>
+<section class="auth-shell-page">
+<div class="auth-card-page">
+<div class="auth-brand-mini">
+<img alt="NOVA" src="assest/Nova-Logo-Clean.png"/><span>MEMBER ACCESS</span>
+</div>
+<div class="auth-tabs-page">
+<button class="auth-tab-page active" data-mode="signin" type="button">
+              Sign In</button><button class="auth-tab-page" data-mode="signup" type="button">
+              Sign Up
+            </button>
+</div>
+<form class="auth-form-page active" id="signinFormPage" onsubmit="submitAuthPage(event,'signin')">
+<label>Email / Phone</label><input id="loginEmailPage" placeholder="Enter email or phone" required="" type="text"/><label>Password</label>
+<div class="password-wrap">
+<input id="loginPasswordPage" placeholder="Enter password" required="" type="password"/><button class="eye-btn" onclick="togglePassword('loginPasswordPage',this)" type="button">
+<i class="bi bi-eye-slash"></i>
+</button>
+</div>
+<div class="auth-inline-page">
+<label class="remember"><input type="checkbox"/> Remember me</label><a href="#">Forgot password?</a>
+</div>
+<div class="captcha-box-page">
+<input placeholder="Enter captcha value" type="text"/><span>N7aX</span><button onclick="refreshCaptcha(this)" type="button">
+<i class="bi bi-arrow-clockwise"></i>
+</button>
+</div>
+<button class="auth-submit-page" type="submit">
+              Sign in <i class="bi bi-arrow-right"></i>
+</button>
+</form>
+<form class="auth-form-page" id="signupFormPage" onsubmit="submitAuthPage(event,'signup')">
+<label>Full Name</label><input id="signupNamePage" placeholder="Enter your full name" required="" type="text"/><label>Email</label><input id="signupEmailPage" placeholder="Enter your email" required="" type="email"/><label>Password</label>
+<div class="password-wrap">
+<input id="signupPasswordPage" placeholder="Create password" required="" type="password"/><button class="eye-btn" onclick="togglePassword('signupPasswordPage',this)" type="button">
+<i class="bi bi-eye-slash"></i>
+</button>
+</div>
+<label>Confirm Password</label><input id="signupConfirmPage" placeholder="Confirm password" required="" type="password"/><button class="auth-submit-page" type="submit">
+              Create account <i class="bi bi-arrow-right"></i>
+</button>
+</form>
+<p class="auth-footer-page">
+            By continuing you agree to NOVA <a href="#">Terms</a> &amp;
+            <a href="#">Privacy</a>.
+          </p>
+</div>
+</section>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
