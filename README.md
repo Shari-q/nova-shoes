@@ -122,14 +122,13 @@ http://localhost:8000
 
 ## Admin backend deployment
 
-GitHub Pages serves static files only; it cannot run `server.js` or provide `/api/login`. To use the admin from the deployed site:
+GitHub Pages serves static files only; it cannot run `server.js` or provide `/api/login`. Deploy the repository as a Render web service using the included `render.yaml`:
 
-1. Deploy the repository root as a Node.js web service with `npm install` as the build command and `npm start` as the start command.
-2. Set `NOVA_ADMIN_EMAIL`, `NOVA_ADMIN_PASSWORD`, and `NOVA_ALLOWED_ORIGINS=https://shari-g.github.io` in the backend host's environment settings.
-3. Set the `nova-api-base-url` meta tag in `admin.html` to the backend's HTTPS origin, for example `https://your-service.example.com`.
-4. Publish the updated `admin.html` to GitHub Pages.
+1. Push the repository, including `render.yaml`, to GitHub.
+2. In Render, create a Blueprint from the `Shari-q/nova-shoes` repository and apply the `nova-shoes` service. Enter the admin email and a strong password when prompted.
+3. Open the deployed service URL followed by `/admin` (for example, `https://your-service.onrender.com/admin`). The page and API share the same host, so no API URL setting is needed.
 
-The backend stores products and orders in JSON files under `data/`; use persistent storage or a database before relying on it for live store operations. Do not use the built-in development password on a public deployment.
+Do not use the GitHub Pages `/admin` URL for login; it will continue to show the backend-not-connected message because that host does not run Node.js. The free Render service may sleep when idle, and its filesystem is not persistent, so JSON catalog/order edits are not suitable for a live store without persistent storage or a database.
 
 ## Sanity product catalog
 
