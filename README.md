@@ -124,9 +124,19 @@ http://localhost:8000
 
 GitHub Pages is static hosting, so the shared catalog now connects directly to Supabase Postgres and Supabase Storage. `supabase-config.json` contains only the public project URL and anon key; database row-level security restricts writes to the admin allowlist. Never put a service-role key in that file or in browser code.
 
-1. Create a Supabase project, then run `supabase/migrations/202610010001_products_and_storage.sql` in the Supabase SQL Editor. It creates the products/orders tables, admin allowlist, RLS policies, and the public-read/private-write `product-images` bucket.
-2. In Supabase Authentication, create the admin user `admin@nova.com` with a strong password and disable public sign-ups. The migration allowlists that email; change the allowlist row in the SQL before running it if you use a different admin email.
-3. In Project Settings → API, copy the Project URL and public anon key into `supabase-config.json` as `url` and `anonKey`. The anon key is designed to be public; RLS is the protection. Do not copy the service-role key there.
+1. Create a Supabase project, then run `supabase/migrations/202610010001_products_and_storage.sql` in the Supabase SQL Editor. It creates the products/orders tables, admin allowlist, RLS policies, and the `product-images` bucket.
+2. In Supabase Authentication, create and confirm `admin@nova.com` with a strong password, then disable public sign-ups. The migration allowlists this email; change its allowlist row before running SQL if you choose another admin email.
+3. In Project Settings → API, copy the Project URL and public anon/publishable key into `supabase-config.json`:
+
+   ```json
+   {
+     "url": "https://YOUR_PROJECT_ID.supabase.co",
+     "anonKey": "YOUR_PUBLIC_ANON_KEY",
+     "storageBucket": "product-images"
+   }
+   ```
+
+   The anon key is intended to be public; RLS provides write protection. Never copy the service-role/secret key into this file.
 4. Import the existing 33 products and 3 sample orders once. In a local PowerShell terminal, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then run `node scripts/migrate-products-to-supabase.js`. The importer skips existing IDs and never overwrites them. Keep the service-role key local; do not commit it or send it in chat.
 5. Commit/push `supabase-config.json` after adding the public URL and anon key so GitHub Pages can read the cloud catalog.
 
@@ -134,9 +144,9 @@ Open `https://shari-q.github.io/nova-shoes/admin`, sign in with the Supabase Aut
 
 The 3 existing orders are sample records only. The checkout flow is still a demo and does not create real orders or process payments.
 
-## Sanity product catalog
+## Legacy Sanity catalog (optional fallback)
 
-The storefront reads published products from a public Sanity dataset and keeps the built-in catalog as a fallback. Product fields include name, slug, category, prices, image, label, rating, description, and sort order.
+Supabase is the primary catalog when `supabase-config.json` is configured. The existing Sanity integration remains as a fallback if Supabase is not configured or unavailable. Product fields include name, slug, category, prices, image, label, rating, description, and sort order.
 
 1. The NOVA Sanity project is configured with project ID `qdlqona2` and the public-read `production` dataset.
 2. In Sanity project API settings, allow the local site origin (for example `http://localhost:8000`) and the deployed site origin. Public read access is required; do not enable credentialed CORS.
